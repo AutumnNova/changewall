@@ -1,7 +1,13 @@
+use colors::colors;
+use export::export;
+use seq::seq;
 use structopt::StructOpt;
-use std::{process::Command, thread, time, fs};
-use notify_rust::{Notification, Urgency};
-
+use std::{thread, time};
+mod colors;
+mod image;
+mod reload;
+mod seq;
+mod export;
 #[derive(StructOpt)]
 struct Cli {
 	//path of wallpaper
@@ -13,32 +19,18 @@ struct Cli {
 fn main() {
 	let args = Cli::from_args();
 
-	Command::new("wal")
-		.args(["-tnqi", &args.path])
-		.spawn()
-		.expect("wal failed");
+	let path = image::image(args.path, args.setting);
 
-	Command::new("feh")
-		.args(["--no-fehbg", &format!("--bg-{}", args.setting), &fs::read_to_string("/home/autumn/.cache/wal/wal").expect("failed to read file")])
-		.spawn()
-		.expect("feh failed");
-
-	dunst();	
-}
-
-fn dunst() {
-	for prc in procfs::process::all_processes().unwrap() {
-		if  prc.stat.comm == "dunst" {
-			nix::sys::signal::kill(prc.stat.pid, nix::sys::signal::Signal::SIGKILL)
-			.expect("SIGTERM failed")
-		}
+	if path == "".to_string() {
+		println!("Path does not point to a valid file/directory");
+		std::process::exit(0);
 	}
+
+	let dict = colors(&path);
+	let seq = seq(&dict);
+	export(&dict);
+
 	thread::sleep(time::Duration::from_millis(1));
 
-	Notification::new()
-	.summary("pywal")
-	.body("Reloaded wal configurations!")
-	.urgency(Urgency::Normal)
-	.show()
-	.unwrap();
+	reload::reload(seq);
 }
