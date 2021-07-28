@@ -1,20 +1,20 @@
-use std::fs;
+use crate::colors::ColorDict;
 use lazy_static::lazy_static;
 use regex::Regex;
-use crate::colors::ColorDict;
+use std::fs::{read_dir, read_to_string, write};
 
-pub fn export(dict:&ColorDict) {
-
-	lazy_static!{
-		static ref RE:Regex = Regex::new("templates/([a-zA-Z.-]+)").unwrap();
+pub fn export(dict: &ColorDict) {
+	lazy_static! {
+		static ref RE: Regex = Regex::new("templates/([a-zA-Z.-]+)").unwrap();
 	};
 
-	for file in fs::read_dir("/home/autumn/.config/wal/templates/").unwrap() {
+	for file in read_dir("/home/autumn/.config/wal/templates/").unwrap() {
 		let path = file.unwrap().path().display().to_string();
-		let dat = fs::read_to_string(&path).unwrap();
-	
+		let dat = read_to_string(&path).unwrap();
+
 		// Run the replace operation in memory
 		let new_data = dat
+			.replace(&*"{wallpaper}", &*dict.wallpaper)
 			.replace(&*"{foreground}", &*dict.foreground)
 			.replace(&*"{background}", &*dict.background)
 			.replace(&*"{cursor}", &*dict.cursor)
@@ -39,9 +39,9 @@ pub fn export(dict:&ColorDict) {
 		let mut newpath = "".to_string();
 
 		for dir in RE.captures(&path) {
-			newpath.push_str(&format!("/home/autumn/.cache/wal/{}", &dir[1]));			
+			newpath.push_str(&format!("/home/autumn/.cache/wal/{}", &dir[1]));
 		}
 
-		fs::write(newpath, new_data).expect("write failed");
+		write(newpath, new_data).expect("write failed");
 	}
 }

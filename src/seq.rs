@@ -1,7 +1,7 @@
 use crate::colors::ColorDict;
 
-pub fn seq(colors:&ColorDict) -> String {
-	let mut temp:String = "".to_string();
+pub fn seq(colors: &ColorDict) -> String {
+	let mut temp: String = "".to_string();
 	temp.push_str(&set_color(0, &colors.color0));
 	temp.push_str(&set_color(1, &colors.color8));
 	temp.push_str(&set_color(2, &colors.color9));
@@ -27,13 +27,13 @@ pub fn seq(colors:&ColorDict) -> String {
 	temp.push_str(&set_color(232, &colors.background));
 	temp.push_str(&set_color(256, &colors.foreground));
 	temp.push_str(&set_special(708, &colors.background));
-temp
+	temp
 }
 
-fn set_special(index:usize, color:&str) -> String {
+fn set_special(index: usize, color: &str) -> String {
 	format!("]{};{}\\", index, color)
 }
 
-fn set_color(index:usize, color:&str) -> String {
+fn set_color(index: usize, color: &str) -> String {
 	format!("]4;{};{}\\", index, color)
 }
