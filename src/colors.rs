@@ -68,7 +68,6 @@ fn adjust(colors: String) -> String {
 		temp.push('&');
 		i += 1;
 	}
-
 	colors
 }
 
@@ -129,7 +128,6 @@ fn darken_color_checked(mut rgb: Vec<u8>, amp: f64) -> Vec<u8> {
 		let r = r * (1f64 - amp);
 		let g = rgb.pop().unwrap() as f64 * (1f64 - amp);
 		let b = rgb.pop().unwrap() as f64 * (1f64 - amp);
-
 		let mut vec: Vec<u8> = Vec::new();
 		vec.push(b as u8);
 		vec.push(g as u8);
@@ -177,10 +175,9 @@ fn format(colors: String, file: String) -> ColorDict {
 	dict
 }
 
-pub fn colors(file: &String) -> ColorDict {
+pub fn colors(file: String) -> ColorDict {
 	let mut colors = get(&file);
 	colors = adjust(colors);
-
 	let dict = format(colors, file.to_string());
 	dict
 }

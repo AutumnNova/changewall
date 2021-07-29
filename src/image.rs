@@ -1,21 +1,41 @@
 use rand::Rng;
-use std::{ffi::OsStr, fs::{metadata, read_dir}, path::Path, process::Command};
+use std::{ffi::OsStr, fs::read_dir, path::Path, process::{exit, Command}};
 
 fn get_extension_from_filename(filename: &str) -> Option<&str> {
 	Path::new(filename).extension().and_then(OsStr::to_str)
 }
 
 pub fn image(path: String, setting: String) -> String {
-	if metadata(&path).expect("error getting path meta").is_dir() {
-		let path = dir(path);
+	let setting = validate_setting(setting);
+	if Path::new(&path).is_dir() {
 		let file = rand(path);
 		feh(&file, setting);
 		file
-	} else if is_img(&path) {
+	} else if Path::new(&path).is_file() && is_img(&path) {
 		feh(&path, setting);
 		path
 	} else {
-		"".to_string()
+		println!("Path does not point to a valid file/directory");
+		exit(0);
+	}
+}
+
+fn validate_setting(setting: String) -> String {
+	if !is_setting(&setting) {
+		println!("Setting invalid, using default");
+		"fill".to_string()
+	} else {
+		setting
+	}
+}
+
+fn is_setting(setting: &str) -> bool {
+	match setting {
+		"center" => true,
+		"fill" => true,
+		"scale" => true,
+		"tile" => true,
+		_ => false,
 	}
 }
 
@@ -31,7 +51,7 @@ fn dir(path: String) -> Vec<String> {
 	vec
 }
 
-fn is_img(file: &String) -> bool {
+fn is_img(file: &str) -> bool {
 	match get_extension_from_filename(&file).unwrap() {
 		"png" => true,
 		"jpg" => true,
@@ -42,7 +62,8 @@ fn is_img(file: &String) -> bool {
 	}
 }
 
-fn rand(mut path: Vec<String>) -> String {
+fn rand(path: String) -> String {
+	let mut path = dir(path);
 	let num = rand::thread_rng().gen_range(0..path.len());
 	let mut i = 1;
 	while num > i {
