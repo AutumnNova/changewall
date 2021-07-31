@@ -3,7 +3,6 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use std::process::Command;
 
-#[derive(Debug)]
 pub struct ColorDict {
 	pub wallpaper: String,
 	pub background: String,
@@ -27,25 +26,44 @@ pub struct ColorDict {
 	pub color15: String,
 }
 
-fn get(file: &String) -> String {
-	let colors = gen_colors(file.to_string());
+fn get(file: &str) -> String {
+	let colors = gen_colors(file);
 	colors
 }
 
-fn gen_colors(file: String) -> String {
-	let raw_col = imagemagick(file, 16);
+fn gen_colors(file: &str) -> String {
 
 	lazy_static! {
 		static ref RE: Regex = Regex::new("(#[A-F0-9]{6})").unwrap();
 	};
 
-	let mut temp: String = "".to_string();
+	let mut temp = "".to_string();
+	let mut i = 0;
 
-	for color in RE.captures_iter(&String::from_utf8_lossy(&raw_col).to_string()) {
-		temp.push_str(&color[0]);
-		temp.push('&');
+	while i <= 20 {
+	let raw_col = imagemagick(file, 16 + i);
+		temp = "".to_string();
+
+		for color in RE.captures_iter(&String::from_utf8_lossy(&raw_col).to_string()) {
+			temp.push_str(&color[0]);
+			temp.push('&');
+		}
+
+		if get_length(&temp) >= 17 {
+			break;
+		}
+		i += 1;
 	}
 	temp
+}
+
+fn get_length(st: &str) -> usize {
+	let mut len = 0;
+
+	for _hex in st.split('&') {
+		len += 1;
+	}
+	len
 }
 
 fn adjust(colors: String) -> String {
@@ -88,6 +106,25 @@ fn hex2rgb(hex: &str) -> Vec<u8> {
 	}
 	vec
 }
+
+pub fn hex2rgbdisplay(hex: &str) -> String {
+	let mut vec = hex2rgb(hex);
+	format!("{},{},{}", vec.pop().unwrap(), vec.pop().unwrap(), vec.pop().unwrap())
+}
+
+pub fn hex2xrgb(hex: &str) -> String {
+	lazy_static! {
+		static ref RE: Regex = Regex::new("#([A-F0-9]{2})([A-F0-9]{2})([A-F0-9]{2})").unwrap();
+	}
+
+	let mut temp = "".to_string();
+
+	for color in RE.captures(&hex) {
+		temp.push_str(&format!("{}/{}/{}/ff", &color[1], &color[2], &color[3]));
+	}
+	temp
+}
+
 
 fn rgb2hex(mut rgb: Vec<u8>) -> String {
 	let r = rgb.pop().unwrap();
@@ -136,7 +173,7 @@ fn darken_color_checked(mut rgb: Vec<u8>, amp: f64) -> Vec<u8> {
 	}
 }
 
-fn imagemagick(file: String, quant: i32) -> Vec<u8> {
+fn imagemagick(file: &str, quant: i32) -> Vec<u8> {
 	let output = Command::new("magick")
 		.args([&file, "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
 		.output()
@@ -145,7 +182,7 @@ fn imagemagick(file: String, quant: i32) -> Vec<u8> {
 	output.stdout
 }
 
-fn format(colors: String, file: String) -> ColorDict {
+fn format(colors: String, file: String, style: bool) -> ColorDict {
 	let mut col = colors.split('&');
 	let mut dict: ColorDict = ColorDict {
 		wallpaper: file,
@@ -171,13 +208,30 @@ fn format(colors: String, file: String) -> ColorDict {
 	};
 	dict.background.clone_from(&dict.color0);
 	dict.foreground.clone_from(&dict.color15);
-	dict.cursor.clone_from(&dict.color15);
+	if !style {
+		dict.cursor.clone_from(&dict.color15);
+		dict.color1.clone_from(&dict.color8);
+		dict.color2.clone_from(&dict.color9);
+		dict.color3.clone_from(&dict.color10);
+		dict.color4.clone_from(&dict.color11);
+		dict.color5.clone_from(&dict.color12);
+		dict.color6.clone_from(&dict.color13);
+		dict.color7.clone_from(&dict.color14);
+		dict.color8.clone_from(&dict.color15);
+		dict.color9.clone_from(&dict.color1);
+		dict.color10.clone_from(&dict.color2);
+		dict.color11.clone_from(&dict.color3);
+		dict.color12.clone_from(&dict.color4);
+		dict.color13.clone_from(&dict.color5);
+		dict.color14.clone_from(&dict.color6);
+		dict.color15.clone_from(&dict.color7);	
+	}
 	dict
 }
 
-pub fn colors(file: String) -> ColorDict {
+pub fn colors(file: String, style: bool) -> ColorDict {
 	let mut colors = get(&file);
 	colors = adjust(colors);
-	let dict = format(colors, file.to_string());
+	let dict = format(colors, file.to_string(), style);
 	dict
 }

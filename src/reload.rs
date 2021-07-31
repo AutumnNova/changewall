@@ -1,3 +1,4 @@
+use home::home_dir;
 use lazy_static::lazy_static;
 use nix::sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}};
 use notify_rust::{Notification, Urgency::Normal};
@@ -51,7 +52,7 @@ fn polybar() {
 
 fn xrdb() {
 	Command::new("xrdb")
-		.args(["-merge", "-quiet", "/home/autumn/.cache/wal/colors.Xresources"])
+		.args(["-merge", "-quiet", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string())])
 		.spawn()
 		.expect("xrdb merge failed");
 }

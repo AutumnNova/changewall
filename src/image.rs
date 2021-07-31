@@ -74,7 +74,7 @@ fn rand(path: String) -> String {
 	path.pop().unwrap()
 }
 
-fn feh(path: &String, setting: String) {
+fn feh(path: &str, setting: String) {
 	Command::new("feh")
 		.args(["--no-fehbg", &format!("--bg-{}", setting), &path])
 		.spawn()

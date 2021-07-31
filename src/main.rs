@@ -15,13 +15,15 @@ struct Cli {
 	path: String,
 	#[structopt(default_value = "fill")]
 	setting: String,
+	//enables a different color style which has 16 unique colors, instead of just the 9
+	#[structopt(short = "n", long = "newstyle")]
+	style: bool,
 }
 
 fn main() {
 	let args = Cli::from_args();
 
-	let dict = colors(image(args.path, args.setting));
-	let seq = seq(&dict);
+	let dict = colors(image(args.path, args.setting), args.style);
 	export(&dict);
-	reload(seq);
+	reload(seq(&dict));
 }
