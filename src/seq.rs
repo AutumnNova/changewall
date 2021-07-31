@@ -19,19 +19,27 @@ pub fn seq(colors: &ColorDict) -> String {
 	temp.push_str(&set_color(14, &colors.color14));
 	temp.push_str(&set_color(15, &colors.color15));
 	temp.push_str(&set_special(10, &colors.foreground));
-	temp.push_str(&set_special(11, &colors.background));
+	temp.push_str(&set_special_alpha(11, &colors.background, colors.alpha));
 	temp.push_str(&set_special(12, &colors.cursor));
 	temp.push_str(&set_special(13, &colors.foreground));
 	temp.push_str(&set_special(17, &colors.foreground));
 	temp.push_str(&set_special(19, &colors.background));
 	temp.push_str(&set_color(232, &colors.background));
 	temp.push_str(&set_color(256, &colors.foreground));
-	temp.push_str(&set_special(708, &colors.background));
+	temp.push_str(&set_special_alpha(708, &colors.background, colors.alpha));
 	temp
 }
 
 fn set_special(index: usize, color: &str) -> String {
 	format!("]{};{}\\", index, color)
+}
+
+fn set_special_alpha(index: usize, color: &str, alpha: usize) -> String {
+	if alpha != 100 {
+		format!("]{};[{}]{}\\", index, alpha, color)
+	} else {
+		format!("]{};{}\\", index, color)
+	}
 }
 
 fn set_color(index: usize, color: &str) -> String {

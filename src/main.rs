@@ -18,12 +18,15 @@ struct Cli {
 	//enables a different color style which has 16 unique colors, instead of just the 9
 	#[structopt(short = "n", long = "newstyle")]
 	style: bool,
+	//URxvt only 
+	#[structopt(short = "a", long = "alpha", default_value = "100")]
+	alpha: usize,
 }
 
 fn main() {
 	let args = Cli::from_args();
 
-	let dict = colors(image(args.path, args.setting), args.style);
+	let dict = colors(image(args.path, args.setting), args.style, args.alpha);
 	export(&dict);
 	reload(seq(&dict));
 }

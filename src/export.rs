@@ -18,7 +18,6 @@ pub fn export(dict: &ColorDict) {
 		let path = file.unwrap().path().display().to_string();
 		let dat = read_to_string(&path).unwrap();
 
-		// {background.alpha} = [100]#03080D
 		// Run the replace operation in memory
 		let new_data = dat
 			.replace(&*"{wallpaper}", &*dict.wallpaper)
@@ -30,6 +29,7 @@ pub fn export(dict: &ColorDict) {
 			.replace(&*"{background.strip}", &*dict.background.strip_prefix('#').unwrap())
 			.replace(&*"{background.rgb}", &*hex2rgbdisplay(&dict.background))
 			.replace(&*"{background.xrgba}", &*hex2xrgb(&dict.background))
+			.replace(&*"{background.alpha}", &*format!("[{}]{}", dict.alpha, dict.background))
 			.replace(&*"{cursor}", &*dict.cursor)
 			.replace(&*"{cursor.strip}", &*dict.cursor.strip_prefix('#').unwrap())
 			.replace(&*"{cursor.rgb}", &*hex2rgbdisplay(&dict.cursor))

@@ -5,6 +5,7 @@ use std::process::Command;
 
 pub struct ColorDict {
 	pub wallpaper: String,
+	pub alpha: usize,
 	pub background: String,
 	pub foreground: String,
 	pub cursor: String,
@@ -180,10 +181,11 @@ fn imagemagick(file: &str, quant: i32) -> Vec<u8> {
 	output.stdout
 }
 
-fn format(colors: String, file: String, style: bool) -> ColorDict {
+fn format(colors: String, file: String, style: bool, alpha: usize) -> ColorDict {
 	let mut col = colors.split('&');
 	let mut dict: ColorDict = ColorDict {
 		wallpaper: file,
+		alpha,
 		background: "".to_string(),
 		foreground: "".to_string(),
 		cursor: "".to_string(),
@@ -227,9 +229,9 @@ fn format(colors: String, file: String, style: bool) -> ColorDict {
 	dict
 }
 
-pub fn colors(file: String, style: bool) -> ColorDict {
+pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
 	let mut colors = get(&file);
 	colors = adjust(colors);
-	let dict = format(colors, file.to_string(), style);
+	let dict = format(colors, file.to_string(), style, alpha);
 	dict
 }
