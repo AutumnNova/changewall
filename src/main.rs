@@ -18,7 +18,7 @@ struct Cli {
 	//enables a different color style which has 16 unique colors, instead of just the 9
 	#[structopt(short = "n", long = "newstyle")]
 	style: bool,
-	//URxvt only 
+	//effects output of console escape seq and any values filled in via template
 	#[structopt(short = "a", long = "alpha", default_value = "100")]
 	alpha: usize,
 }

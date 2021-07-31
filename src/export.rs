@@ -1,18 +1,11 @@
 use crate::colors::{hex2rgbdisplay, hex2xrgb, ColorDict};
 use home::home_dir;
-use lazy_static::lazy_static;
-use regex::Regex;
 use std::fs::{create_dir_all, read_dir, read_to_string, write};
 
 pub fn export(dict: &ColorDict) {
-	lazy_static! {
-		static ref RE: Regex = Regex::new("templates/([a-zA-Z.-]+)").unwrap();
-	};
-
-	let templatedir = format!("{}/.config/wal/templates/", home_dir().unwrap().display().to_string());
+	let templatedir = format!("{}/.config/wal/", home_dir().unwrap().display().to_string());
 	let _f = create_dir_all(&templatedir);
-	let cachedir = format!("{}/.cache/wal", home_dir().unwrap().display().to_string());
-	let _f = create_dir_all(&cachedir);
+	let _f = create_dir_all(&templatedir.replace(&*"/.config/", &*"/.cache/"));
 
 	for file in read_dir(templatedir).unwrap() {
 		let path = file.unwrap().path().display().to_string();
@@ -21,6 +14,8 @@ pub fn export(dict: &ColorDict) {
 		// Run the replace operation in memory
 		let new_data = dat
 			.replace(&*"{wallpaper}", &*dict.wallpaper)
+			.replace(&*"{alpha}", &*dict.alpha.to_string())
+			.replace(&*"{alpha.decimal}", &*(dict.alpha/100).to_string())
 			.replace(&*"{foreground}", &*dict.foreground)
 			.replace(&*"{foreground.strip}", &*dict.foreground.strip_prefix('#').unwrap())
 			.replace(&*"{foreground.rgb}", &*hex2rgbdisplay(&dict.foreground))
@@ -99,12 +94,6 @@ pub fn export(dict: &ColorDict) {
 			.replace(&*"{color15.rgb}", &*hex2rgbdisplay(&dict.color15))
 			.replace(&*"{color15.xrgba}", &*hex2xrgb(&dict.color15));
 
-		let mut newpath = "".to_string();
-
-		for dir in RE.captures(&path) {
-			newpath.push_str(&format!("{}/{}", &cachedir, &dir[1]));
-		}
-
-		write(newpath, new_data).expect("write failed");
+			write(path.replace(&*"/.config/", &*"/.cache/"), new_data).expect("write failed");
 	}
 }
