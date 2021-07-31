@@ -32,7 +32,6 @@ fn get(file: &str) -> String {
 }
 
 fn gen_colors(file: &str) -> String {
-
 	lazy_static! {
 		static ref RE: Regex = Regex::new("(#[A-F0-9]{6})").unwrap();
 	};
@@ -41,7 +40,7 @@ fn gen_colors(file: &str) -> String {
 	let mut i = 0;
 
 	while i <= 20 {
-	let raw_col = imagemagick(file, 16 + i);
+		let raw_col = imagemagick(file, 16 + i);
 		temp = "".to_string();
 
 		for color in RE.captures_iter(&String::from_utf8_lossy(&raw_col).to_string()) {
@@ -124,7 +123,6 @@ pub fn hex2xrgb(hex: &str) -> String {
 	}
 	temp
 }
-
 
 fn rgb2hex(mut rgb: Vec<u8>) -> String {
 	let r = rgb.pop().unwrap();
@@ -224,7 +222,7 @@ fn format(colors: String, file: String, style: bool) -> ColorDict {
 		dict.color12.clone_from(&dict.color4);
 		dict.color13.clone_from(&dict.color5);
 		dict.color14.clone_from(&dict.color6);
-		dict.color15.clone_from(&dict.color7);	
+		dict.color15.clone_from(&dict.color7);
 	}
 	dict
 }

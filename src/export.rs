@@ -1,8 +1,8 @@
-use crate::colors::{ColorDict, hex2rgbdisplay, hex2xrgb};
+use crate::colors::{hex2rgbdisplay, hex2xrgb, ColorDict};
 use home::home_dir;
 use lazy_static::lazy_static;
 use regex::Regex;
-use std::fs::{read_dir, read_to_string, write, create_dir_all};
+use std::fs::{create_dir_all, read_dir, read_to_string, write};
 
 pub fn export(dict: &ColorDict) {
 	lazy_static! {
@@ -17,7 +17,6 @@ pub fn export(dict: &ColorDict) {
 	for file in read_dir(templatedir).unwrap() {
 		let path = file.unwrap().path().display().to_string();
 		let dat = read_to_string(&path).unwrap();
-
 
 		// {background.alpha} = [100]#03080D
 		// Run the replace operation in memory
@@ -103,7 +102,7 @@ pub fn export(dict: &ColorDict) {
 		let mut newpath = "".to_string();
 
 		for dir in RE.captures(&path) {
-			newpath.push_str(&format!("{}/{}",&cachedir , &dir[1]));
+			newpath.push_str(&format!("{}/{}", &cachedir, &dir[1]));
 		}
 
 		write(newpath, new_data).expect("write failed");
