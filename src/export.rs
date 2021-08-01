@@ -15,7 +15,7 @@ pub fn export(dict: &ColorDict) {
 		let new_data = dat
 			.replace(&*"{wallpaper}", &*dict.wallpaper)
 			.replace(&*"{alpha}", &*dict.alpha.to_string())
-			.replace(&*"{alpha.decimal}", &*(dict.alpha/100).to_string())
+			.replace(&*"{alpha.decimal}", &*(dict.alpha / 100).to_string())
 			.replace(&*"{foreground}", &*dict.foreground)
 			.replace(&*"{foreground.strip}", &*dict.foreground.strip_prefix('#').unwrap())
 			.replace(&*"{foreground.rgb}", &*hex2rgbdisplay(&dict.foreground))
@@ -94,6 +94,6 @@ pub fn export(dict: &ColorDict) {
 			.replace(&*"{color15.rgb}", &*hex2rgbdisplay(&dict.color15))
 			.replace(&*"{color15.xrgba}", &*hex2xrgb(&dict.color15));
 
-			write(path.replace(&*"/.config/", &*"/.cache/"), new_data).expect("write failed");
+		write(path.replace(&*"/.config/", &*"/.cache/"), new_data).expect("write failed");
 	}
 }

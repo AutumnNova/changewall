@@ -220,6 +220,6 @@ fn format(mut colors: Vec<String>, file: String, style: bool, alpha: usize) -> C
 
 pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
 	let colors = get(&file);
-	let dict = format(colors, file.to_string(), style, alpha);
+	let dict = format(adjust(colors), file.to_string(), style, alpha);
 	dict
 }
