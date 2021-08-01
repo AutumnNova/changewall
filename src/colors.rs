@@ -27,29 +27,28 @@ pub struct ColorDict {
 	pub color15: String,
 }
 
-fn get(file: &str) -> String {
+fn get(file: &str) -> Vec<String> {
 	let colors = gen_colors(file);
 	colors
 }
 
-fn gen_colors(file: &str) -> String {
+fn gen_colors(file: &str) -> Vec<String> {
 	lazy_static! {
-		static ref RE: Regex = Regex::new("(#[A-F0-9]{6})").unwrap();
+		static ref RE: Regex = Regex::new("(#[a-fA-F0-9]{6})").unwrap();
 	};
 
-	let mut temp = "".to_string();
+	let mut temp = Vec::new();
 	let mut i = 0;
 
 	while i <= 20 {
 		let raw_col = imagemagick(file, 16 + i);
-		temp = "".to_string();
+		temp.clear();
 
 		for color in RE.captures_iter(&String::from_utf8_lossy(&raw_col).to_string()) {
-			temp.push_str(&color[0]);
-			temp.push('&');
+			temp.insert(0, color[0].to_string());
 		}
 
-		if get_length(&temp) >= 17 {
+		if temp.len() >= 16 {
 			break;
 		}
 		i += 1;
@@ -57,41 +56,31 @@ fn gen_colors(file: &str) -> String {
 	temp
 }
 
-fn get_length(st: &str) -> usize {
-	let mut len = 0;
-
-	for _hex in st.split('&') {
-		len += 1;
-	}
-	len
-}
-
-fn adjust(colors: String) -> String {
-	let mut temp = "".to_string();
+fn adjust(colors: Vec<String>) -> Vec<String> {
+	let mut temp = Vec::new();
 	let mut i = 0;
 
-	for hex in colors.strip_suffix('&').unwrap().split('&') {
-		let mut rgb = hex2rgb(hex);
+	for hex in &colors {
+		let mut rgb = hex2rgb(&hex);
 		if i == 0 {
-			rgb = darken_color_checked(rgb, 0.40)
+			rgb = blend_color(rgb, vec![238, 238, 238])
 		} else if i == 7 {
-			rgb = blend_color(rgb, vec![238, 238, 238])
-		} else if i == 8 {
 			rgb = darken_color(rgb, 0.30)
-		} else if i == 15 {
+		} else if i == 8 {
 			rgb = blend_color(rgb, vec![238, 238, 238])
+		} else if i == 15 {
+			rgb = darken_color_checked(rgb, 0.40)
 		}
 		let hex = rgb2hex(rgb);
-		temp.push_str(&hex);
-		temp.push('&');
+		temp.push(hex);
 		i += 1;
 	}
-	colors
+	temp
 }
 
 fn hex2rgb(hex: &str) -> Vec<u8> {
 	lazy_static! {
-		static ref RE: Regex = Regex::new("#([A-F0-9]{2})([A-F0-9]{2})([A-F0-9]{2})").unwrap();
+		static ref RE: Regex = Regex::new("#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})").unwrap();
 	};
 
 	let mut vec: Vec<u8> = Vec::new();
@@ -157,7 +146,7 @@ fn blend_color(mut rgb1: Vec<u8>, mut rgb2: Vec<u8>) -> Vec<u8> {
 
 fn darken_color_checked(mut rgb: Vec<u8>, amp: f64) -> Vec<u8> {
 	let r = rgb.pop().unwrap() as f64;
-	if r < 16f64 {
+	if r >= 16f64 {
 		rgb.push(r as u8);
 		rgb
 	} else {
@@ -181,35 +170,35 @@ fn imagemagick(file: &str, quant: i32) -> Vec<u8> {
 	output.stdout
 }
 
-fn format(colors: String, file: String, style: bool, alpha: usize) -> ColorDict {
-	let mut col = colors.split('&');
+fn format(mut colors: Vec<String>, file: String, style: bool, alpha: usize) -> ColorDict {
 	let mut dict: ColorDict = ColorDict {
 		wallpaper: file,
 		alpha,
 		background: "".to_string(),
 		foreground: "".to_string(),
 		cursor: "".to_string(),
-		color0: col.next().unwrap().to_string(),
-		color1: col.next().unwrap().to_string(),
-		color2: col.next().unwrap().to_string(),
-		color3: col.next().unwrap().to_string(),
-		color4: col.next().unwrap().to_string(),
-		color5: col.next().unwrap().to_string(),
-		color6: col.next().unwrap().to_string(),
-		color7: col.next().unwrap().to_string(),
-		color8: col.next().unwrap().to_string(),
-		color9: col.next().unwrap().to_string(),
-		color10: col.next().unwrap().to_string(),
-		color11: col.next().unwrap().to_string(),
-		color12: col.next().unwrap().to_string(),
-		color13: col.next().unwrap().to_string(),
-		color14: col.next().unwrap().to_string(),
-		color15: col.next().unwrap().to_string(),
+		color0: colors.pop().unwrap().to_string(),
+		color1: colors.pop().unwrap().to_string(),
+		color2: colors.pop().unwrap().to_string(),
+		color3: colors.pop().unwrap().to_string(),
+		color4: colors.pop().unwrap().to_string(),
+		color5: colors.pop().unwrap().to_string(),
+		color6: colors.pop().unwrap().to_string(),
+		color7: colors.pop().unwrap().to_string(),
+		color8: colors.pop().unwrap().to_string(),
+		color9: colors.pop().unwrap().to_string(),
+		color10: colors.pop().unwrap().to_string(),
+		color11: colors.pop().unwrap().to_string(),
+		color12: colors.pop().unwrap().to_string(),
+		color13: colors.pop().unwrap().to_string(),
+		color14: colors.pop().unwrap().to_string(),
+		color15: colors.pop().unwrap().to_string(),
 	};
+
 	dict.background.clone_from(&dict.color0);
 	dict.foreground.clone_from(&dict.color15);
+	dict.cursor.clone_from(&dict.color15);
 	if !style {
-		dict.cursor.clone_from(&dict.color15);
 		dict.color1.clone_from(&dict.color8);
 		dict.color2.clone_from(&dict.color9);
 		dict.color3.clone_from(&dict.color10);
@@ -230,8 +219,7 @@ fn format(colors: String, file: String, style: bool, alpha: usize) -> ColorDict 
 }
 
 pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
-	let mut colors = get(&file);
-	colors = adjust(colors);
+	let colors = get(&file);
 	let dict = format(colors, file.to_string(), style, alpha);
 	dict
 }
