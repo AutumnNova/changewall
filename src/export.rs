@@ -8,6 +8,9 @@ pub fn export(dict: &ColorDict) {
 	let _f = create_dir_all(&templatedir.replace(&*"/.config/", &*"/.cache/"));
 
 	for file in read_dir(templatedir).unwrap() {
+		if file.as_ref().unwrap().path().is_dir() {
+			continue;
+		}
 		let path = file.unwrap().path().display().to_string();
 		let dat = read_to_string(&path).unwrap();
 

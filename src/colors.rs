@@ -1,6 +1,4 @@
 use hex::{decode, encode};
-use lazy_static::lazy_static;
-use regex::Regex;
 use std::process::Command;
 
 pub struct ColorDict {
@@ -27,15 +25,7 @@ pub struct ColorDict {
 	pub color15: String,
 }
 
-fn get(file: &str) -> Vec<String> {
-	let colors = gen_colors(file);
-	colors
-}
-
 fn gen_colors(file: &str) -> Vec<String> {
-	lazy_static! {
-		static ref RE: Regex = Regex::new("(#[a-fA-F0-9]{6})").unwrap();
-	};
 
 	let mut temp = Vec::new();
 	let mut i = 0;
@@ -44,8 +34,9 @@ fn gen_colors(file: &str) -> Vec<String> {
 		let raw_col = imagemagick(file, 16 + i);
 		temp.clear();
 
-		for color in RE.captures_iter(&String::from_utf8_lossy(&raw_col).to_string()) {
-			temp.insert(0, color[0].to_string());
+		let asd = String::from_utf8_lossy(&raw_col).to_string();
+		for line in asd.lines().skip(1) {
+			temp.insert(0, line.split("  srgb(").next().unwrap().rsplit(")  ").next().unwrap().to_string());
 		}
 
 		if temp.len() >= 16 {
@@ -62,14 +53,13 @@ fn adjust(colors: Vec<String>) -> Vec<String> {
 
 	for hex in &colors {
 		let mut rgb = hex2rgb(&hex);
-		if i == 0 {
-			rgb = blend_color(rgb, vec![238, 238, 238])
-		} else if i == 7 {
-			rgb = darken_color(rgb, 0.30)
-		} else if i == 8 {
-			rgb = blend_color(rgb, vec![238, 238, 238])
-		} else if i == 15 {
-			rgb = darken_color_checked(rgb, 0.40)
+		match i {
+			// vec is inverted so 0=15, 1=14 and so on
+			0 => rgb = blend_color(rgb, vec![238, 238, 238]),
+			7 => rgb = darken_color(rgb, 0.30),
+			8 => rgb = blend_color(rgb, vec![238, 238, 238]),
+			15 => rgb = darken_color_checked(rgb, 0.40),
+			_ => (),
 		}
 		let hex = rgb2hex(rgb);
 		temp.push(hex);
@@ -79,21 +69,9 @@ fn adjust(colors: Vec<String>) -> Vec<String> {
 }
 
 fn hex2rgb(hex: &str) -> Vec<u8> {
-	lazy_static! {
-		static ref RE: Regex = Regex::new("#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})").unwrap();
-	};
-
-	let mut vec: Vec<u8> = Vec::new();
-
-	for color in RE.captures(&hex) {
-		let mut r = decode(&color[1]).unwrap();
-		let mut g = decode(&color[2]).unwrap();
-		let mut b = decode(&color[3]).unwrap();
-		vec.push(b.pop().unwrap());
-		vec.push(g.pop().unwrap());
-		vec.push(r.pop().unwrap());
-	}
-	vec
+	let split1 = hex.strip_prefix('#').unwrap().split_at(2);
+	let split2 = split1.1.split_at(2);
+	vec![decode(split2.1).unwrap().pop().unwrap(), decode(split2.0).unwrap().pop().unwrap(), decode(split1.0).unwrap().pop().unwrap()]
 }
 
 pub fn hex2rgbdisplay(hex: &str) -> String {
@@ -102,24 +80,12 @@ pub fn hex2rgbdisplay(hex: &str) -> String {
 }
 
 pub fn hex2xrgb(hex: &str) -> String {
-	lazy_static! {
-		static ref RE: Regex = Regex::new("#([A-F0-9]{2})([A-F0-9]{2})([A-F0-9]{2})").unwrap();
-	}
-
-	let mut temp = "".to_string();
-
-	for color in RE.captures(&hex) {
-		temp.push_str(&format!("{}/{}/{}/ff", &color[1], &color[2], &color[3]));
-	}
-	temp
+	let mut rgb = hex2rgb(hex);
+	format!("{}/{}/{}/ff", &rgb.pop().unwrap(), &rgb.pop().unwrap(), &rgb.pop().unwrap())
 }
 
 fn rgb2hex(mut rgb: Vec<u8>) -> String {
-	let r = rgb.pop().unwrap();
-	let g = rgb.pop().unwrap();
-	let b = rgb.pop().unwrap();
-	let hex = format!("#{}", encode(vec![r, g, b]));
-	hex
+	format!("#{}", encode(vec![rgb.pop().unwrap(), rgb.pop().unwrap(), rgb.pop().unwrap()]))
 }
 
 fn darken_color(mut rgb: Vec<u8>, amp: f64) -> Vec<u8> {
@@ -146,18 +112,11 @@ fn blend_color(mut rgb1: Vec<u8>, mut rgb2: Vec<u8>) -> Vec<u8> {
 
 fn darken_color_checked(mut rgb: Vec<u8>, amp: f64) -> Vec<u8> {
 	let r = rgb.pop().unwrap() as f64;
-	if r >= 16f64 {
-		rgb.push(r as u8);
+	rgb.push(r as u8);
+	if r < 16f64 {
 		rgb
 	} else {
-		let r = r * (1f64 - amp);
-		let g = rgb.pop().unwrap() as f64 * (1f64 - amp);
-		let b = rgb.pop().unwrap() as f64 * (1f64 - amp);
-		let mut vec: Vec<u8> = Vec::new();
-		vec.push(b as u8);
-		vec.push(g as u8);
-		vec.push(r as u8);
-		vec
+		darken_color(rgb, amp)
 	}
 }
 
@@ -219,7 +178,5 @@ fn format(mut colors: Vec<String>, file: String, style: bool, alpha: usize) -> C
 }
 
 pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
-	let colors = get(&file);
-	let dict = format(adjust(colors), file.to_string(), style, alpha);
-	dict
+	format(adjust(gen_colors(&file)), file.to_string(), style, alpha)
 }
