@@ -1,28 +1,9 @@
+use crate::colordict::ColorDict;
 use hex::{decode, encode};
 use std::process::Command;
 
-pub struct ColorDict {
-	pub wallpaper: String,
-	pub alpha: usize,
-	pub background: String,
-	pub foreground: String,
-	pub cursor: String,
-	pub color0: String,
-	pub color1: String,
-	pub color2: String,
-	pub color3: String,
-	pub color4: String,
-	pub color5: String,
-	pub color6: String,
-	pub color7: String,
-	pub color8: String,
-	pub color9: String,
-	pub color10: String,
-	pub color11: String,
-	pub color12: String,
-	pub color13: String,
-	pub color14: String,
-	pub color15: String,
+pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
+	format(adjust(gen_colors(&file)), file.to_string(), style, alpha)
 }
 
 fn gen_colors(file: &str) -> Vec<String> {
@@ -133,50 +114,37 @@ fn format(mut colors: Vec<String>, file: String, style: bool, alpha: usize) -> C
 	let mut dict: ColorDict = ColorDict {
 		wallpaper: file,
 		alpha,
-		background: "".to_string(),
-		foreground: "".to_string(),
-		cursor: "".to_string(),
-		color0: colors.pop().unwrap().to_string(),
-		color1: colors.pop().unwrap().to_string(),
-		color2: colors.pop().unwrap().to_string(),
-		color3: colors.pop().unwrap().to_string(),
-		color4: colors.pop().unwrap().to_string(),
-		color5: colors.pop().unwrap().to_string(),
-		color6: colors.pop().unwrap().to_string(),
-		color7: colors.pop().unwrap().to_string(),
-		color8: colors.pop().unwrap().to_string(),
-		color9: colors.pop().unwrap().to_string(),
-		color10: colors.pop().unwrap().to_string(),
-		color11: colors.pop().unwrap().to_string(),
-		color12: colors.pop().unwrap().to_string(),
-		color13: colors.pop().unwrap().to_string(),
-		color14: colors.pop().unwrap().to_string(),
-		color15: colors.pop().unwrap().to_string(),
+		background: String::new(),
+		foreground: String::new(),
+		cursor: String::new(),
+		colorvec: Vec::new(),
 	};
 
-	dict.background.clone_from(&dict.color0);
-	dict.foreground.clone_from(&dict.color15);
-	dict.cursor.clone_from(&dict.color15);
 	if !style {
-		dict.color1.clone_from(&dict.color8);
-		dict.color2.clone_from(&dict.color9);
-		dict.color3.clone_from(&dict.color10);
-		dict.color4.clone_from(&dict.color11);
-		dict.color5.clone_from(&dict.color12);
-		dict.color6.clone_from(&dict.color13);
-		dict.color7.clone_from(&dict.color14);
-		dict.color8.clone_from(&dict.color15);
-		dict.color9.clone_from(&dict.color1);
-		dict.color10.clone_from(&dict.color2);
-		dict.color11.clone_from(&dict.color3);
-		dict.color12.clone_from(&dict.color4);
-		dict.color13.clone_from(&dict.color5);
-		dict.color14.clone_from(&dict.color6);
-		dict.color15.clone_from(&dict.color7);
+		dict.colorvec = vechack(colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string());
+	} else {
+		dict.colorvec = vec![colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string()]
 	}
+	dict.background.clone_from(&dict.colorvec.clone().into_iter().nth(0).unwrap());
+	dict.foreground.clone_from(&dict.colorvec.clone().into_iter().nth(15).unwrap());
+	dict.cursor.clone_from(&dict.foreground);
 	dict
 }
-
-pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
-	format(adjust(gen_colors(&file)), file.to_string(), style, alpha)
-}
+#[allow(unused_assignments)]
+fn vechack(color0: String, mut color1: String, mut color2: String, mut color3:String, mut color4:String, mut color5:String, mut color6:String, mut color7:String, mut color8:String, mut color9:String, mut color10:String, mut color11:String, mut color12:String, mut color13:String, mut color14:String, mut color15: String) -> Vec<String> {
+	color1 = color8.clone();
+	color2 = color9.clone();
+	color3 = color10.clone();
+	color4 = color11.clone();
+	color5 = color12.clone();
+	color6 = color13.clone();
+	color7 = color14.clone();
+	color8 = color15.clone();
+	color9 = color1.clone();
+	color10 = color2.clone();
+	color11 = color3.clone();
+	color12 = color4.clone();
+	color13 = color5.clone();
+	color14 = color6.clone();
+	color15 = color7.clone();
+	vec![color0, color1, color2, color3, color4, color5, color6, color7, color8, color9, color10, color11, color12, color13, color14, color15]}

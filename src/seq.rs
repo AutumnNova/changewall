@@ -1,23 +1,14 @@
-use crate::colors::ColorDict;
-
+use crate::colordict::ColorDict;
 pub fn seq(colors: &ColorDict) -> String {
-	let mut temp: String = "".to_string();
-	temp.push_str(&set_color(0, &colors.color0));
-	temp.push_str(&set_color(1, &colors.color1));
-	temp.push_str(&set_color(2, &colors.color2));
-	temp.push_str(&set_color(3, &colors.color3));
-	temp.push_str(&set_color(4, &colors.color4));
-	temp.push_str(&set_color(5, &colors.color5));
-	temp.push_str(&set_color(6, &colors.color6));
-	temp.push_str(&set_color(7, &colors.color7));
-	temp.push_str(&set_color(8, &colors.color8));
-	temp.push_str(&set_color(9, &colors.color9));
-	temp.push_str(&set_color(10, &colors.color10));
-	temp.push_str(&set_color(11, &colors.color11));
-	temp.push_str(&set_color(12, &colors.color12));
-	temp.push_str(&set_color(13, &colors.color13));
-	temp.push_str(&set_color(14, &colors.color14));
-	temp.push_str(&set_color(15, &colors.color15));
+	let mut dict: ColorDict = ColorDict::clonedict(colors);
+	let mut temp: String = String::new();
+	let mut i = 0;
+
+	for entry in &mut dict.colorvec {
+		temp.push_str(&set_color(i, entry));
+		i += 1;
+	}
+
 	temp.push_str(&set_special(10, &colors.foreground));
 	temp.push_str(&set_special_alpha(11, &colors.background, colors.alpha));
 	temp.push_str(&set_special(12, &colors.cursor));
@@ -31,17 +22,17 @@ pub fn seq(colors: &ColorDict) -> String {
 }
 
 fn set_special(index: usize, color: &str) -> String {
-	format!("]{};{}\\", index, color)
+	format!("\u{001B}]{};{}\u{001B}\\", index, color)
 }
 
 fn set_special_alpha(index: usize, color: &str, alpha: usize) -> String {
 	if alpha != 100 {
-		format!("]{};[{}]{}\\", index, alpha, color)
+		format!("\u{001B}]{};[{}]{}\u{001B}\\", index, alpha, color)
 	} else {
-		format!("]{};{}\\", index, color)
+		format!("\u{001B}]{};{}\u{001B}\\", index, color)
 	}
 }
 
 fn set_color(index: usize, color: &str) -> String {
-	format!("]4;{};{}\\", index, color)
+	format!("\u{001B}]4;{};{}\u{001B}\\", index, color)
 }

@@ -9,6 +9,7 @@ mod export;
 mod image;
 mod reload;
 mod seq;
+mod colordict;
 #[derive(StructOpt)]
 struct Cli {
 	//path of wallpaper

@@ -1,10 +1,6 @@
 use rand::Rng;
 use std::{ffi::OsStr, fs::read_dir, path::Path, process::{exit, Command}};
 
-fn get_extension_from_filename(filename: &str) -> Option<&str> {
-	Path::new(filename).extension().and_then(OsStr::to_str)
-}
-
 pub fn image(path: String, setting: String) -> String {
 	let setting = validate_setting(setting);
 	if Path::new(&path).is_dir() {
@@ -18,6 +14,10 @@ pub fn image(path: String, setting: String) -> String {
 		println!("Path does not point to a valid file/directory");
 		exit(0);
 	}
+}
+
+fn get_extension_from_filename(filename: &str) -> Option<&str> {
+	Path::new(filename).extension().and_then(OsStr::to_str)
 }
 
 fn validate_setting(setting: String) -> String {
