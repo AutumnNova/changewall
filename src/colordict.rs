@@ -12,12 +12,12 @@ impl ColorDict {
 	#[inline]
 	pub const fn new() -> Self {
 		ColorDict {
-		wallpaper: String::new(),
-		alpha: 100,
-		background: String::new(),
-		foreground: String::new(),
-		cursor: String::new(),
-		colorvec: Vec::new(),
+			wallpaper: String::new(),
+			alpha: 100,
+			background: String::new(),
+			foreground: String::new(),
+			cursor: String::new(),
+			colorvec: Vec::new(),
 		}
 	}
 

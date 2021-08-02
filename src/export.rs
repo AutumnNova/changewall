@@ -46,8 +46,7 @@ pub fn export(dict: &ColorDict) {
 }
 
 fn parameters(data: String, from: String, to: &str) -> String {
-	data
-		.replace(&*format!("{{{}}}", from), to)
+	data.replace(&*format!("{{{}}}", from), to)
 		.replace(&*format!("{{{}.strip}}", from), to.strip_prefix('#').unwrap())
 		.replace(&*format!("{{{}.rgb}}", from), &hex2rgbdisplay(&to))
 		.replace(&*format!("{{{}.xrgba}}", from), &hex2xrgb(&to))

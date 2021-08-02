@@ -7,7 +7,6 @@ pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
 }
 
 fn gen_colors(file: &str) -> Vec<String> {
-
 	let mut temp = Vec::new();
 	let mut i = 0;
 

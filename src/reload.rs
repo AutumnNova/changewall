@@ -28,7 +28,6 @@ fn dunst() {
 }
 
 fn pts(seq: String) {
-
 	for dir in read_dir("/dev/pts/").unwrap() {
 		let file = dir.unwrap().path().display().to_string();
 		if !file.contains("ptmx") {
