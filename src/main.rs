@@ -12,14 +12,15 @@ mod reload;
 mod seq;
 #[derive(StructOpt)]
 struct Cli {
-	//path of wallpaper
+	///path of wallpaper
 	path: String,
+	///value to be passed to feh, valid options are center, fill, scale and tile
 	#[structopt(default_value = "fill")]
 	setting: String,
-	//enables a different color style which has 16 unique colors, instead of just the 9
+	///EXPERIMENTAL: enables a different color style which has 16 unique colors, instead of just the 9
 	#[structopt(short = "n", long = "newstyle")]
 	style: bool,
-	//effects output of console escape seq and any values filled in via template
+	///effects output of console escape seq and any values filled in via template
 	#[structopt(short = "a", long = "alpha", default_value = "100")]
 	alpha: usize,
 }

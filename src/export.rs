@@ -37,8 +37,8 @@ pub fn export(dict: &ColorDict) {
 
 		let mut i = 0;
 		for entry in &mut dict.colorvec {
-			new_data = parameters(new_data, format!("{{color{}}}", i), entry);
-			i += 0;
+			new_data = parameters(new_data, format!("color{}", i), entry);
+			i += 1;
 		}
 
 		write(path.replace(&*"/.config/", &*"/.cache/"), new_data).expect("write failed");
