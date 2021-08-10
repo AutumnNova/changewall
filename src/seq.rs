@@ -1,5 +1,5 @@
 use crate::colordict::ColorDict;
-pub fn seq(colors: &ColorDict) -> String {
+pub fn seq(colors: &ColorDict, vte: bool) -> String {
 	let mut dict: ColorDict = ColorDict::clonedict(colors);
 	let mut temp: String = String::new();
 	let mut i = 0;
@@ -17,7 +17,9 @@ pub fn seq(colors: &ColorDict) -> String {
 	temp.push_str(&set_special(19, &colors.background));
 	temp.push_str(&set_color(232, &colors.background));
 	temp.push_str(&set_color(256, &colors.foreground));
-	temp.push_str(&set_special_alpha(708, &colors.background, colors.alpha));
+	if !vte {
+		temp.push_str(&set_special_alpha(708, &colors.background, colors.alpha));
+	}
 	temp
 }
 

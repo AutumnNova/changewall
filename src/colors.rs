@@ -110,15 +110,9 @@ fn imagemagick(file: &str, quant: i32) -> Vec<u8> {
 }
 
 fn format(mut colors: Vec<String>, file: String, style: bool, alpha: usize) -> ColorDict {
-	let mut dict: ColorDict = ColorDict {
-		wallpaper: file,
-		alpha,
-		background: String::new(),
-		foreground: String::new(),
-		cursor: String::new(),
-		colorvec: Vec::new(),
-	};
-
+	let mut dict: ColorDict = ColorDict::new();
+	dict.wallpaper = file;
+	dict.alpha = alpha;
 	if !style {
 		dict.colorvec = vechack(colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string(), colors.pop().unwrap().to_string());
 	} else {

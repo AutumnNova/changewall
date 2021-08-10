@@ -21,8 +21,14 @@ struct Cli {
 	#[structopt(short = "n", long = "newstyle")]
 	style: bool,
 	///effects output of console escape seq and any values filled in via template
-	#[structopt(short = "a", long = "alpha", default_value = "100")]
+	#[structopt(short, long, default_value = "100")]
 	alpha: usize,
+	///List of things to skip reloading. Valid options are: (t)erminal, (x)rdb, (p)olybar, (d)unst, (i)3, (s)way, (a)ll
+	#[structopt(short, long, default_value = "")]
+	skip: String,
+	///Skip setting esc seq 708, may fix artifacting in vte terms
+	#[structopt(short, long)]
+	vte: bool,
 }
 
 fn main() {
@@ -30,5 +36,5 @@ fn main() {
 
 	let dict = colors(image(args.path, args.setting), args.style, args.alpha);
 	export(&dict);
-	reload(seq(&dict));
+	reload(seq(&dict, args.vte), args.skip);
 }
