@@ -10,6 +10,7 @@ mod export;
 mod image;
 mod reload;
 mod seq;
+mod tests;
 #[derive(StructOpt)]
 struct Cli {
 	///path of wallpaper

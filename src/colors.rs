@@ -48,7 +48,7 @@ fn adjust(colors: Vec<String>) -> Vec<String> {
 	temp
 }
 
-fn hex2rgb(hex: &str) -> Vec<u8> {
+pub fn hex2rgb(hex: &str) -> Vec<u8> {
 	let split1 = hex.strip_prefix('#').unwrap().split_at(2);
 	let split2 = split1.1.split_at(2);
 	vec![decode(split2.1).unwrap().pop().unwrap(), decode(split2.0).unwrap().pop().unwrap(), decode(split1.0).unwrap().pop().unwrap()]
@@ -64,7 +64,7 @@ pub fn hex2xrgb(hex: &str) -> String {
 	format!("{}/{}/{}/ff", &rgb.pop().unwrap(), &rgb.pop().unwrap(), &rgb.pop().unwrap())
 }
 
-fn rgb2hex(mut rgb: Vec<u8>) -> String {
+pub fn rgb2hex(mut rgb: Vec<u8>) -> String {
 	format!("#{}", encode(vec![rgb.pop().unwrap(), rgb.pop().unwrap(), rgb.pop().unwrap()]))
 }
 
