@@ -1,14 +1,18 @@
 use rand::Rng;
 use std::{ffi::OsStr, fs::read_dir, path::Path, process::{exit, Command}};
 
-pub fn image(path: String, setting: String) -> String {
+pub fn image(path: String, setting: String, skip: bool) -> String {
 	let setting = validate_setting(setting);
 	if Path::new(&path).is_dir() {
 		let file = rand(path);
-		feh(&file, setting);
+		if !skip {
+			feh(&file, setting);
+		}
 		file
 	} else if Path::new(&path).is_file() && is_img(&path) {
-		feh(&path, setting);
+		if !skip {
+			feh(&path, setting);
+		}
 		path
 	} else {
 		println!("Path does not point to a valid file/directory");
@@ -40,9 +44,8 @@ fn is_setting(setting: &str) -> bool {
 }
 
 fn dir(path: String) -> Vec<String> {
-	let files = read_dir(path).unwrap();
 	let mut vec = vec![];
-	for dir in files {
+	for dir in read_dir(path).unwrap() {
 		let file = dir.unwrap().path().display().to_string();
 		if is_img(&file) {
 			vec.push(file);
@@ -63,15 +66,8 @@ fn is_img(file: &str) -> bool {
 }
 
 fn rand(path: String) -> String {
-	let mut path = dir(path);
 	let num = rand::thread_rng().gen_range(0..path.len());
-	let mut i = 1;
-	while num > i {
-		path.pop();
-		i += 1;
-	}
-
-	path.pop().unwrap()
+	dir(path).into_iter().nth(num).unwrap()
 }
 
 fn feh(path: &str, setting: String) {

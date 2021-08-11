@@ -1,4 +1,4 @@
-use crate::colordict::ColorDict;
+use super::colordict::ColorDict;
 use hex::{decode, encode};
 use std::process::Command;
 
@@ -8,20 +8,21 @@ pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
 
 fn gen_colors(file: &str) -> Vec<String> {
 	let mut temp = Vec::new();
+	//vec!["#04080E".to_string(), "#0D152A".to_string(), "#11213B".to_string(), "#142A4D".to_string(), "#252454".to_string(), "#2F306C".to_string(), "#4D2A6E".to_string(), "#2C4673".to_string(), "#4A4974".to_string(), "#3F4B8F".to_string(), "#5C5F9E".to_string(), "#A853B7".to_string(), "#658AC1".to_string(), "#9E96D7".to_string(), "#D895D8".to_string(), "#E1CEE7".to_string()];
 	let mut i = 0;
 
 	while i <= 20 {
 		let raw_col = imagemagick(file, 16 + i);
-		temp.clear();
 
-		let asd = String::from_utf8_lossy(&raw_col).to_string();
-		for line in asd.lines().skip(1) {
-			temp.insert(0, line.split("  srgb(").next().unwrap().rsplit(")  ").next().unwrap().to_string());
+		let output = String::from_utf8_lossy(&raw_col).to_string();
+		for line in output.lines().skip(1) {
+			temp.insert(0, line.split("  ").nth(1).unwrap().to_string());
 		}
 
 		if temp.len() >= 16 {
 			break;
 		}
+		temp.clear();
 		i += 1;
 	}
 	temp
@@ -101,6 +102,10 @@ fn darken_color_checked(mut rgb: Vec<u8>, amp: f64) -> Vec<u8> {
 }
 
 fn imagemagick(file: &str, quant: i32) -> Vec<u8> {
+	//~160ms of runtime is spent on this
+	//~70-80ms difference between spawn() and output()
+	//~70-80ms collecting output?
+	//~70-80ms spawning??
 	let output = Command::new("magick")
 		.args([&file, "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
 		.output()

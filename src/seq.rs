@@ -1,4 +1,4 @@
-use crate::colordict::ColorDict;
+use super::colordict::ColorDict;
 pub fn seq(colors: &ColorDict, vte: bool) -> String {
 	let mut dict: ColorDict = ColorDict::clonedict(colors);
 	let mut temp: String = String::new();

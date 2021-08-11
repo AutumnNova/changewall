@@ -2,7 +2,7 @@ use home::home_dir;
 use nix::sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
-use std::{fs::{read_dir, write}, process::Command, thread::sleep, time::Duration};
+use std::{fs::{read_dir, write}, process::{Command, Stdio}, thread::sleep, time::Duration};
 
 pub fn reload(seq: String, skip: String) {
 
@@ -91,6 +91,7 @@ fn pts(seq: String) {
 			write(file, &seq).expect("write to /dev/pts failed.");
 		}
 	}
+	write(format!("{}/.cache/wal/seq", home_dir().unwrap().display().to_string()), seq).expect("write failed");
 }
 
 fn polybar() {
@@ -102,19 +103,22 @@ fn polybar() {
 }
 
 fn xrdb() {
-	let _ = Command::new("xrdb")
-		.args(["-merge", "-quiet", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string())])
-		.spawn();
+	droppedcmd("xrdb", "-merge", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string()));
 }
 
 fn i3() {
-	let _ = Command::new("i3-msg")
-		.arg("reload")
-		.output();
+	droppedcmd("swaymsg", "i3-msg", "");
 }
 
 fn sway() {
-	let _ = Command::new("swaymsg")
-		.arg("reload")
+	droppedcmd("swaymsg", "reload", "");
+}
+
+fn droppedcmd(cmd: &str, arg: &str, arg2: &str) {
+	let _ = Command::new(cmd)
+		.args([arg, arg2])
+		.stdin(Stdio::null())
+		.stdout(Stdio::null())
+		.stderr(Stdio::null())
 		.spawn();
 }
