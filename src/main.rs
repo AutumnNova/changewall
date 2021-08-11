@@ -6,6 +6,7 @@ use preview::preview;
 use reload::reload;
 use seq::seq;
 use structopt::StructOpt;
+mod cache;
 mod colordict;
 mod colors;
 mod export;
@@ -13,7 +14,6 @@ mod image;
 mod preview;
 mod reload;
 mod seq;
-mod cache;
 mod tests;
 #[derive(StructOpt)]
 struct Cli {
@@ -42,7 +42,7 @@ struct Cli {
 fn main() {
 	let args = Cli::from_args();
 
-	let img = image(args.path, args.setting, args.skip.contains('w') || args.skip.contains('a') );
+	let img = image(args.path, args.setting, args.skip.contains('w') || args.skip.contains('a'));
 	let mut dict = readcache(&img, &args.alpha);
 	if dict.background == String::new() {
 		dict = colors(img, args.style, args.alpha);

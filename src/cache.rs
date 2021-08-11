@@ -5,10 +5,8 @@ use std::fs::{create_dir_all, read_to_string, write};
 pub fn writecache(dict: &ColorDict) {
 	let dict: ColorDict = ColorDict::clonedict(dict);
 
-
 	let cachedir = format!("{}/.cache/wal/palette/", home_dir().unwrap().display().to_string());
 	let _ = create_dir_all(&cachedir);
-
 
 	let mut tmp = String::new();
 	for color in dict.colorvec.into_iter() {
@@ -43,6 +41,6 @@ pub fn readcache(path: &str, alpha: &usize) -> ColorDict {
 		dict.alpha = *alpha;
 		dict
 	} else {
-		ColorDict::new()		
+		ColorDict::new()
 	}
 }

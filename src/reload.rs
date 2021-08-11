@@ -5,9 +5,8 @@ use procfs::process::all_processes;
 use std::{fs::{read_dir, write}, process::{Command, Stdio}, thread::sleep, time::Duration};
 
 pub fn reload(seq: String, skip: String) {
-
 	if skip == "a" {
-		return
+		return;
 	}
 	let mut proc = String::new();
 
@@ -17,7 +16,7 @@ pub fn reload(seq: String, skip: String) {
 			"polybar" => proc.push_str("p"),
 			"i3" => proc.push_str("i"),
 			"sway" => proc.push_str("s"),
-			_ => ()
+			_ => (),
 		}
 	}
 
@@ -28,10 +27,9 @@ pub fn reload(seq: String, skip: String) {
 	}
 }
 
-
 fn reload_checked(seq: String, proc: String) {
-		pts(seq);
-		xrdb();
+	pts(seq);
+	xrdb();
 	if proc.contains('p') {
 		polybar();
 	}
@@ -45,7 +43,6 @@ fn reload_checked(seq: String, proc: String) {
 		sway();
 	}
 }
-
 
 fn reload_checked_skips(seq: String, skip: String, proc: String) {
 	if !skip.contains('t') {
