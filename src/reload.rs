@@ -1,10 +1,13 @@
+mod seq;
+use seq::seq;
+use super::colors::colordict::ColorDict;
 use home::home_dir;
 use nix::sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
 use std::{fs::{read_dir, write}, process::{Command, Stdio}, thread::sleep, time::Duration};
 
-pub fn reload(seq: String, skip: String) {
+pub fn reload(dict: ColorDict, skip: String, vte: bool, setting: String) {
 	if skip == "a" {
 		return;
 	}
@@ -21,14 +24,15 @@ pub fn reload(seq: String, skip: String) {
 	}
 
 	if skip == "" {
-		reload_checked(seq, proc)
+		reload_checked(dict, proc, vte, setting)
 	} else {
-		reload_checked_skips(seq, skip, proc)
+		reload_checked_skips(dict, skip, proc, vte, setting)
 	}
 }
 
-fn reload_checked(seq: String, proc: String) {
-	pts(seq);
+fn reload_checked(dict: ColorDict, proc: String, vte: bool, setting: String) {
+	feh(&dict.wallpaper, setting);
+	pts(dict, vte);
 	xrdb();
 	if proc.contains('p') {
 		polybar();
@@ -44,9 +48,12 @@ fn reload_checked(seq: String, proc: String) {
 	}
 }
 
-fn reload_checked_skips(seq: String, skip: String, proc: String) {
+fn reload_checked_skips(dict: ColorDict, skip: String, proc: String, vte: bool, setting: String) {
+	if !skip.contains('w') {
+		feh(&dict.wallpaper, setting);
+	}
 	if !skip.contains('t') {
-		pts(seq);
+		pts(dict, vte);
 	}
 	if !skip.contains('x') {
 		xrdb();
@@ -81,7 +88,8 @@ fn dunst() {
 		.unwrap();
 }
 
-fn pts(seq: String) {
+fn pts(dict: ColorDict, vte: bool) {
+	let seq = seq(dict, vte);
 	for dir in read_dir("/dev/pts/").unwrap() {
 		let file = dir.unwrap().path().display().to_string();
 		if !file.contains("ptmx") {
@@ -100,22 +108,45 @@ fn polybar() {
 }
 
 fn xrdb() {
-	droppedcmd("xrdb", "-merge", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string()));
+	droppedcmd("xrdb", "-merge", "-quiet", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string()));
 }
 
 fn i3() {
-	droppedcmd("swaymsg", "i3-msg", "");
+	droppedcmd("swaymsg", "i3-msg", "", "");
 }
 
 fn sway() {
-	droppedcmd("swaymsg", "reload", "");
+	droppedcmd("swaymsg", "reload", "", "");
 }
 
-fn droppedcmd(cmd: &str, arg: &str, arg2: &str) {
+fn feh(path: &str, setting: String) {
+	droppedcmd("feh", "--no-fehbg",&format!("--bg-{}", validate_setting(setting)), &path);
+}
+
+fn droppedcmd(cmd: &str, arg: &str, arg2: &str, arg3: &str) {
 	let _ = Command::new(cmd)
-		.args([arg, arg2])
+		.args([arg, arg2, arg3])
 		.stdin(Stdio::null())
 		.stdout(Stdio::null())
 		.stderr(Stdio::null())
 		.spawn();
+}
+
+fn validate_setting(setting: String) -> String {
+	if !is_setting(&setting) {
+		println!("Setting invalid, using default");
+		"fill".to_string()
+	} else {
+		setting
+	}
+}
+
+fn is_setting(setting: &str) -> bool {
+	match setting {
+		"center" => true,
+		"fill" => true,
+		"scale" => true,
+		"tile" => true,
+		_ => false,
+	}
 }

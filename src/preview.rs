@@ -5,13 +5,11 @@ pub fn preview() {
 		if i <= 7 {
 			tmp.push_str(&*format!("\u{001B}[4{}m    \u{001B}\u{001B}", i));
 		} else if i == 8 {
-			tmp.push('\n');
-			tmp.push_str(&*format!("\u{001B}[48;5;{}m    \u{001B}\u{001B}", i));
+			tmp.push_str(&*format!("\n\u{001B}[48;5;{}m    \u{001B}\u{001B}", i));
 		} else {
 			tmp.push_str(&*format!("\u{001B}[48;5;{}m    \u{001B}\u{001B}", i));
 		}
 		i += 1;
 	}
-	tmp.push('\n');
-	println!("{}", tmp);
+	println!("{}\n", tmp);
 }

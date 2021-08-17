@@ -1,4 +1,4 @@
-use super::colordict::ColorDict;
+use super::colors::colordict::ColorDict;
 use home::home_dir;
 use std::fs::{create_dir_all, read_to_string, write};
 
@@ -10,17 +10,12 @@ pub fn writecache(dict: &ColorDict) {
 
 	let mut tmp = String::new();
 	for color in dict.colorvec.into_iter() {
-		tmp.push_str(&color);
-		tmp.push('\n');
+		tmp.push_str(&format!("{}\n", color));
 	}
-	tmp.push_str(&dict.foreground);
-	tmp.push('\n');
-	tmp.push_str(&dict.background);
-	tmp.push('\n');
-	tmp.push_str(&dict.cursor);
-	tmp.push('\n');
-	tmp.push_str(&dict.wallpaper);
-	write(format!("{}{}", cachedir, &dict.wallpaper.replace('/', "%")), tmp).expect("write failed");
+	tmp.push_str(&format!("{}\n", dict.foreground));
+	tmp.push_str(&format!("{}\n", dict.background));
+	tmp.push_str(&format!("{}\n", dict.cursor));
+	write(format!("{}{}", cachedir, dict.wallpaper.replace('/', "%")), tmp).expect("write failed");
 }
 
 pub fn readcache(path: &str, alpha: &usize) -> ColorDict {
@@ -37,7 +32,7 @@ pub fn readcache(path: &str, alpha: &usize) -> ColorDict {
 		dict.foreground = ln.next().unwrap().to_string();
 		dict.background = ln.next().unwrap().to_string();
 		dict.cursor = ln.next().unwrap().to_string();
-		dict.wallpaper = ln.next().unwrap().to_string();
+		dict.wallpaper = path.to_string();
 		dict.alpha = *alpha;
 		dict
 	} else {
