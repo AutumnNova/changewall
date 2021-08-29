@@ -15,10 +15,10 @@ pub fn reload(dict: ColorDict, skip: String, vte: bool, setting: String) {
 
 	for prc in all_processes().unwrap() {
 		match &*prc.stat.comm {
-			"dunst" => proc.push_str("d"),
-			"polybar" => proc.push_str("p"),
-			"i3" => proc.push_str("i"),
-			"sway" => proc.push_str("s"),
+			"dunst" => proc.push('d'),
+			"polybar" => proc.push('p'),
+			"i3" => proc.push('i'),
+			"sway" => proc.push('s'),
 			_ => (),
 		}
 	}
@@ -58,16 +58,16 @@ fn reload_checked_skips(dict: ColorDict, skip: String, proc: String, vte: bool, 
 	if !skip.contains('x') {
 		xrdb();
 	}
-	if proc.contains('p') || !skip.contains('p') {
+	if proc.contains('p') && !skip.contains('p') {
 		polybar();
 	}
-	if proc.contains('d') || !skip.contains('d') {
+	if proc.contains('d') && !skip.contains('d') {
 		dunst();
 	}
-	if proc.contains('i') || !skip.contains('i') {
+	if proc.contains('i') && !skip.contains('i') {
 		i3();
 	}
-	if proc.contains('s') || !skip.contains('s') {
+	if proc.contains('s') && !skip.contains('s') {
 		sway();
 	}
 }
@@ -108,24 +108,24 @@ fn polybar() {
 }
 
 fn xrdb() {
-	droppedcmd("xrdb", "-merge", "-quiet", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string()));
+	droppedcmd(&["xrdb", "-merge", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string())]);
 }
 
 fn i3() {
-	droppedcmd("swaymsg", "i3-msg", "", "");
+	droppedcmd(&["i3-msg", "reload"]);
 }
 
 fn sway() {
-	droppedcmd("swaymsg", "reload", "", "");
+	droppedcmd(&["swaymsg", "reload"]);
 }
 
 fn feh(path: &str, setting: String) {
-	droppedcmd("feh", "--no-fehbg",&format!("--bg-{}", validate_setting(setting)), &path);
+	droppedcmd(&["feh", "--no-fehbg", &format!("--bg-{}", validate_setting(setting)), &path]);
 }
 
-fn droppedcmd(cmd: &str, arg: &str, arg2: &str, arg3: &str) {
-	let _ = Command::new(cmd)
-		.args([arg, arg2, arg3])
+fn droppedcmd(command: &[&str]) {
+	let _ = Command::new(command[0])
+		.args(&command[1..])
 		.stdin(Stdio::null())
 		.stdout(Stdio::null())
 		.stderr(Stdio::null())

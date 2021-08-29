@@ -9,7 +9,6 @@ pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
 
 fn gen_colors(file: &str) -> Vec<String> {
 	let mut temp = Vec::new();
-	//vec!["#04080E".to_string(), "#0D152A".to_string(), "#11213B".to_string(), "#142A4D".to_string(), "#252454".to_string(), "#2F306C".to_string(), "#4D2A6E".to_string(), "#2C4673".to_string(), "#4A4974".to_string(), "#3F4B8F".to_string(), "#5C5F9E".to_string(), "#A853B7".to_string(), "#658AC1".to_string(), "#9E96D7".to_string(), "#D895D8".to_string(), "#E1CEE7".to_string()];
 	let mut i = 0;
 
 	while i <= 20 {
@@ -66,7 +65,7 @@ pub fn hex2xrgb(hex: &str) -> String {
 	format!("{}/{}/{}/ff", &rgb.pop().unwrap(), &rgb.pop().unwrap(), &rgb.pop().unwrap())
 }
 
- fn rgb2hex(mut rgb: Vec<u8>) -> String {
+fn rgb2hex(mut rgb: Vec<u8>) -> String {
 	format!("#{}", encode(vec![rgb.pop().unwrap(), rgb.pop().unwrap(), rgb.pop().unwrap()]))
 }
 
@@ -103,10 +102,6 @@ fn darken_color_checked(mut rgb: Vec<u8>, amp: f64) -> Vec<u8> {
 }
 
 fn imagemagick(file: &str, quant: i32) -> Vec<u8> {
-	//~160ms of runtime is spent on this
-	//~70-80ms difference between spawn() and output()
-	//~70-80ms collecting output?
-	//~70-80ms spawning??
 	let output = Command::new("magick")
 		.args([&file, "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
 		.output()
@@ -148,58 +143,58 @@ fn vechack(color0: String, mut color1: String, mut color2: String, mut color3:St
 	color15 = color7.clone();
 	vec![color0, color1, color2, color3, color4, color5, color6, color7, color8, color9, color10, color11, color12, color13, color14, color15]}
 
-	mod tests {
+mod tests {
 	#[allow(unused_imports)]
-	use super::{blend_color, darken_color, darken_color_checked, hex2rgb, hex2rgbdisplay, hex2xrgb, rgb2hex};
+	use super::{
+		blend_color, darken_color, darken_color_checked, hex2rgb, hex2rgbdisplay, hex2xrgb, rgb2hex,
+	};
 
-		
-		#[test]
-		fn test_rgb2hex() {
-			assert_eq!(rgb2hex(vec![255, 255, 255]), "#ffffff");
-			assert_eq!(rgb2hex(vec![127, 127, 127]), "#7f7f7f");
-			assert_eq!(rgb2hex(vec![0, 0, 0]), "#000000");
-		}
-	
-		#[test]
-		fn test_hex2rgb() {
-			assert_eq!(hex2rgb("#FFFFFF"), vec![255, 255, 255]);
-			assert_eq!(hex2rgb("#7F7F7F"), vec![127, 127, 127]);
-			assert_eq!(hex2rgb("#000000"), vec![0, 0, 0]);
-		}
-	
-		#[test]
-		fn test_hex2xrgb() {
-			assert_eq!(hex2xrgb("#FFFFFF"), "255/255/255/ff");
-			assert_eq!(hex2xrgb("#7F7F7F"), "127/127/127/ff");
-			assert_eq!(hex2xrgb("#000000"), "0/0/0/ff");
-		}
-
-		#[test]
-		fn test_hex2rgbdisplay() {
-			assert_eq!(hex2rgbdisplay("#FFFFFF"), "255,255,255");
-			assert_eq!(hex2rgbdisplay("#7F7F7F"), "127,127,127");
-			assert_eq!(hex2rgbdisplay("#000000"), "0,0,0");
-		}
-
-		#[test]
-		fn test_darkencolor() {
-			assert_eq!(darken_color(vec![255, 255, 255], 0.0), [255, 255, 255]);
-			assert_eq!(darken_color(vec![255, 255, 255], 0.5), [127, 127, 127]);
-			assert_eq!(darken_color(vec![127, 127, 127], 1.0), [0, 0, 0]);
-		}
-
-		#[test]
-		fn test_darkencolorchecked() {
-			assert_eq!(darken_color_checked(vec![255, 255, 255], 0.0), [255, 255, 255]);
-			assert_eq!(darken_color_checked(vec![127, 127, 127], 1.0), [0, 0, 0]);
-			assert_eq!(darken_color_checked(vec![10, 10, 10], 0.5), [10, 10, 10]);
-		}
-
-		#[test]
-		fn test_blendcolor() {
-			assert_eq!(blend_color(vec![255, 255, 255], vec![255, 255, 255]), [255, 255, 255]);
-			assert_eq!(blend_color(vec![255, 255, 255], vec![0, 0, 0]), [127, 127, 127]);
-			assert_eq!(blend_color(vec![0, 0, 0], vec![255, 255, 255]), [127, 127, 127]);
-		}
+	#[test]
+	fn test_rgb2hex() {
+		assert_eq!(rgb2hex(vec![255, 255, 255]), "#ffffff");
+		assert_eq!(rgb2hex(vec![127, 127, 127]), "#7f7f7f");
+		assert_eq!(rgb2hex(vec![0, 0, 0]), "#000000");
 	}
-	
+
+	#[test]
+	fn test_hex2rgb() {
+		assert_eq!(hex2rgb("#FFFFFF"), vec![255, 255, 255]);
+		assert_eq!(hex2rgb("#7F7F7F"), vec![127, 127, 127]);
+		assert_eq!(hex2rgb("#000000"), vec![0, 0, 0]);
+	}
+
+	#[test]
+	fn test_hex2xrgb() {
+		assert_eq!(hex2xrgb("#FFFFFF"), "255/255/255/ff");
+		assert_eq!(hex2xrgb("#7F7F7F"), "127/127/127/ff");
+		assert_eq!(hex2xrgb("#000000"), "0/0/0/ff");
+	}
+
+	#[test]
+	fn test_hex2rgbdisplay() {
+		assert_eq!(hex2rgbdisplay("#FFFFFF"), "255,255,255");
+		assert_eq!(hex2rgbdisplay("#7F7F7F"), "127,127,127");
+		assert_eq!(hex2rgbdisplay("#000000"), "0,0,0");
+	}
+
+	#[test]
+	fn test_darkencolor() {
+		assert_eq!(darken_color(vec![255, 255, 255], 0.0), [255, 255, 255]);
+		assert_eq!(darken_color(vec![255, 255, 255], 0.5), [127, 127, 127]);
+		assert_eq!(darken_color(vec![127, 127, 127], 1.0), [0, 0, 0]);
+	}
+
+	#[test]
+	fn test_darkencolorchecked() {
+		assert_eq!(darken_color_checked(vec![255, 255, 255], 0.0), [255, 255, 255]);
+		assert_eq!(darken_color_checked(vec![127, 127, 127], 1.0), [0, 0, 0]);
+		assert_eq!(darken_color_checked(vec![10, 10, 10], 0.5), [10, 10, 10]);
+	}
+
+	#[test]
+	fn test_blendcolor() {
+		assert_eq!(blend_color(vec![255, 255, 255], vec![255, 255, 255]), [255, 255, 255]);
+		assert_eq!(blend_color(vec![255, 255, 255], vec![0, 0, 0]), [127, 127, 127]);
+		assert_eq!(blend_color(vec![0, 0, 0], vec![255, 255, 255]), [127, 127, 127]);
+	}
+}

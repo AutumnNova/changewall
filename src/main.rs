@@ -40,7 +40,7 @@ fn main() {
 
 	let img = image(args.path);
 	let mut dict = readcache(&img, &args.alpha);
-	if dict.background == String::new() {
+	if dict.background.len() == 0 {
 		dict = colors(img, args.style, args.alpha);
 		writecache(&dict);
 	}
