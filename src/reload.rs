@@ -2,7 +2,7 @@ mod seq;
 use seq::seq;
 use super::colors::colordict::ColorDict;
 use home::home_dir;
-use nix::sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}};
+use nix::{sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}}, unistd::Pid};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
 use std::{fs::{read_dir, write}, process::{Command, Stdio}, thread::sleep, time::Duration};
@@ -75,7 +75,7 @@ fn reload_checked_skips(dict: ColorDict, skip: String, proc: String, vte: bool, 
 fn dunst() {
 	for prc in all_processes().unwrap() {
 		if prc.stat.comm == "dunst" || prc.stat.comm == "/usr/bin/dunst" {
-			kill(prc.stat.pid, SIGKILL).expect("SIGTERM failed")
+			kill(Pid::from_raw(prc.stat.pid), SIGKILL).expect("SIGTERM failed")
 		}
 	}
 	sleep(Duration::from_millis(1));
@@ -102,7 +102,7 @@ fn pts(dict: ColorDict, vte: bool) {
 fn polybar() {
 	for prc in all_processes().unwrap() {
 		if prc.stat.comm == "polybar" {
-			kill(prc.stat.pid, SIGUSR1).expect("SIGUSR1 failed")
+			kill(Pid::from_raw(prc.stat.pid), SIGUSR1).expect("SIGUSR1 failed")
 		}
 	}
 }
