@@ -3,13 +3,13 @@ use home::home_dir;
 use std::fs::{create_dir_all, read_to_string, write};
 
 pub fn writecache(dict: &ColorDict) {
-	let dict: ColorDict = ColorDict::clonedict(dict);
+	let colorvec = dict.colorvec.to_vec();
 
 	let cachedir = format!("{}/.cache/wal/palette/", home_dir().unwrap().display().to_string());
 	let _ = create_dir_all(&cachedir);
 
 	let mut tmp = String::new();
-	for color in dict.colorvec.into_iter() {
+	for color in colorvec.into_iter() {
 		tmp.push_str(&format!("{}\n", color));
 	}
 	tmp.push_str(&format!("{}\n", dict.foreground));
@@ -21,7 +21,7 @@ pub fn writecache(dict: &ColorDict) {
 pub fn readcache(path: &str, alpha: &usize) -> ColorDict {
 	let cachedir = format!("{}/.cache/wal/palette/", home_dir().unwrap().display().to_string());
 	let data = read_to_string(format!("{}{}", cachedir, &path.replace('/', "%"))).unwrap_or(String::new());
-	if data != String::new() {
+	if data != "" {
 		let mut ln = data.lines();
 		let mut dict = ColorDict::new();
 		let mut i = 0;

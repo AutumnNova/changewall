@@ -30,7 +30,7 @@ struct Cli {
 	///Skip setting esc seq 708, may fix artifacting in vte terms
 	#[structopt(short, long)]
 	vte: bool,
-	//Preview current color theme
+	///Preview current color theme
 	#[structopt(short, long)]
 	preview: bool,
 }

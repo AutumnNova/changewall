@@ -20,11 +20,4 @@ impl ColorDict {
 			colorvec: Vec::new(),
 		}
 	}
-
-	#[inline]
-	pub fn clonedict(dict: &ColorDict) -> ColorDict {
-		let mut temp: ColorDict = ColorDict::new();
-		temp.clone_from(dict);
-		temp
-	}
 }

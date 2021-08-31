@@ -1,10 +1,10 @@
 mod seq;
-use seq::seq;
 use super::colors::colordict::ColorDict;
 use home::home_dir;
 use nix::{sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}}, unistd::Pid};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
+use seq::seq;
 use std::{fs::{read_dir, write}, process::{Command, Stdio}, thread::sleep, time::Duration};
 
 pub fn reload(dict: ColorDict, skip: String, vte: bool, setting: String) {

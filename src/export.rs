@@ -4,7 +4,7 @@ use home::home_dir;
 use std::fs::{create_dir_all, read_dir, read_to_string, write};
 
 pub fn export(dict: &ColorDict) {
-	let mut dict: ColorDict = ColorDict::clonedict(dict);
+	let mut colorvec = dict.colorvec.to_vec();
 	let templatedir = format!("{}/.config/wal/", home_dir().unwrap().display().to_string());
 
 	let _ = create_dir_all(&templatedir);
@@ -28,7 +28,7 @@ pub fn export(dict: &ColorDict) {
 		new_data = parameters(new_data, "cursor".to_string(), &dict.cursor);
 
 		let mut i = 0;
-		for entry in &mut dict.colorvec {
+		for entry in &mut colorvec {
 			new_data = parameters(new_data, format!("color{}", i), entry);
 			i += 1;
 		}
