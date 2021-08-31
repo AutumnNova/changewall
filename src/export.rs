@@ -1,5 +1,4 @@
-use super::colors::colordict::ColorDict;
-use super::colors::{hex2rgbdisplay, hex2xrgb};
+use super::colors::{colordict::ColorDict, convert::{hex2rgbdisplay, hex2xrgb}};
 use home::home_dir;
 use std::fs::{create_dir_all, read_dir, read_to_string, write};
 

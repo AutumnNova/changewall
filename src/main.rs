@@ -5,7 +5,7 @@ mod image;
 mod preview;
 mod reload;
 use cache::{readcache, writecache};
-use colors::colors;
+use colors::{colordict::ColorDict, colors};
 use export::export;
 use image::image;
 use preview::preview;
@@ -33,16 +33,24 @@ struct Cli {
 	///Preview current color theme
 	#[structopt(short, long)]
 	preview: bool,
+	///Disable read/write of cache file
+	#[structopt(long)]
+	nocache: bool,
 }
 
 fn main() {
 	let args = Cli::from_args();
 
 	let img = image(args.path);
-	let mut dict = readcache(&img, &args.alpha);
+	let mut dict = ColorDict::new();
+	if !args.nocache {
+		dict = readcache(&img, &args.alpha);
+	}
 	if dict.background.len() == 0 {
 		dict = colors(img, args.style, args.alpha);
-		writecache(&dict);
+		if !args.nocache {
+			writecache(&dict);
+		}
 	}
 	export(&dict);
 	reload(dict, args.skip, args.vte, args.setting);
