@@ -5,9 +5,11 @@ use nix::{sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}}, unistd::Pid};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
 use seq::seq;
-use std::{fs::{read_dir, write}, process::{Command, Stdio}, thread::sleep, time::Duration};
+use tree_magic_mini::from_filepath;
+use wall::xlib::{ImageFormat, Xlib};
+use std::{fs::{read_dir, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
 
-pub fn reload(dict: ColorDict, skip: String, vte: bool, setting: String) {
+pub fn reload(dict: ColorDict, skip: String, vte: bool, feh: bool, setting: String) {
 	if skip == "a" {
 		return;
 	}
@@ -24,15 +26,15 @@ pub fn reload(dict: ColorDict, skip: String, vte: bool, setting: String) {
 	}
 
 	if skip == "" {
-		reload_checked(dict, proc, vte, setting)
+		reload_checked(dict, proc, vte, feh, setting)
 	} else {
-		reload_checked_skips(dict, skip, proc, vte, setting)
+		reload_checked_skips(dict, skip, proc, vte, feh, setting)
 	}
 }
 
-fn reload_checked(dict: ColorDict, proc: String, vte: bool, setting: String) {
-	feh(&dict.wallpaper, setting);
-	pts(dict, vte);
+fn reload_checked(dict: ColorDict, proc: String, vte: bool, usefeh: bool, setting: String) {
+	feh(&dict.wallpaper, usefeh, setting);
+	pts(dict, vte, true);
 	xrdb();
 	if proc.contains('p') {
 		polybar();
@@ -48,12 +50,12 @@ fn reload_checked(dict: ColorDict, proc: String, vte: bool, setting: String) {
 	}
 }
 
-fn reload_checked_skips(dict: ColorDict, skip: String, proc: String, vte: bool, setting: String) {
+fn reload_checked_skips(dict: ColorDict, skip: String, proc: String, vte: bool, usefeh: bool, setting: String) {
 	if !skip.contains('w') {
-		feh(&dict.wallpaper, setting);
+		feh(&dict.wallpaper, usefeh, setting);
 	}
 	if !skip.contains('t') {
-		pts(dict, vte);
+		pts(dict, vte, !skip.contains('e'));
 	}
 	if !skip.contains('x') {
 		xrdb();
@@ -88,7 +90,7 @@ fn dunst() {
 		.unwrap();
 }
 
-fn pts(dict: ColorDict, vte: bool) {
+fn pts(dict: ColorDict, vte: bool, writeseq: bool) {
 	let seq = seq(dict, vte);
 	for dir in read_dir("/dev/pts/").unwrap() {
 		let file = dir.unwrap().path().display().to_string();
@@ -96,7 +98,9 @@ fn pts(dict: ColorDict, vte: bool) {
 			write(file, &seq).expect("write to /dev/pts failed.");
 		}
 	}
-	write(format!("{}/.cache/wal/seq", home_dir().unwrap().display().to_string()), seq).expect("write failed");
+	if writeseq {
+		write(format!("{}/.cache/wal/seq", home_dir().unwrap().display().to_string()), seq).expect("write failed");
+	}
 }
 
 fn polybar() {
@@ -119,8 +123,13 @@ fn sway() {
 	droppedcmd(&["swaymsg", "reload"]);
 }
 
-fn feh(path: &str, setting: String) {
-	droppedcmd(&["feh", "--no-fehbg", &format!("--bg-{}", validate_setting(setting)), &path]);
+fn feh(path: &str, usefeh: bool, setting: String) {
+	if usefeh {
+		droppedcmd(&["feh", "--no-fehbg", &format!("--bg-{}", validate_setting(setting)), &path]);
+	} else {
+		let path = Path::new(&path);
+		Xlib::set(&Xlib::new().unwrap(), path, mime2format(&path)).unwrap();
+	}
 }
 
 fn droppedcmd(command: &[&str]) {
@@ -138,6 +147,15 @@ fn validate_setting(setting: String) -> String {
 		"fill".to_string()
 	} else {
 		setting
+	}
+}
+
+fn mime2format(path: &Path) -> Option<ImageFormat> {
+	match from_filepath(path).unwrap() {
+		"image/jpeg" => Some(ImageFormat::Jpeg),
+		"image/png" => Some(ImageFormat::Png),
+		"image/gif" => Some(ImageFormat::Gif),
+		_ => None,
 	}
 }
 

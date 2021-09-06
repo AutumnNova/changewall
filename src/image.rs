@@ -1,11 +1,11 @@
 use rand::Rng;
-use std::{ffi::OsStr, fs::read_dir, path::Path, process::exit};
-
+use std::{fs::read_dir, path::Path, process::exit};
+use tree_magic_mini::from_filepath;
 pub fn image(path: String) -> String {
-	if Path::new(&path).is_dir() {
-		let file = rand(path);
-		file
-	} else if Path::new(&path).is_file() && is_img(&path) {
+	let pathdir = Path::new(&path);
+	if pathdir.is_dir() {
+		rand(path)
+	} else if pathdir.is_file() && is_img(&pathdir) {
 		path
 	} else {
 		println!("Path does not point to a valid file/directory");
@@ -13,33 +13,28 @@ pub fn image(path: String) -> String {
 	}
 }
 
-fn get_extension_from_filename(filename: &str) -> Option<&str> {
-	Path::new(filename).extension().and_then(OsStr::to_str)
-}
-
 fn dir(path: String) -> Vec<String> {
 	let mut vec = vec![];
 	for dir in read_dir(path).unwrap() {
-		let file = dir.unwrap().path().display().to_string();
+		let file = dir.unwrap().path();
 		if is_img(&file) {
-			vec.push(file);
+			vec.push(file.display().to_string());
 		}
 	}
 	vec
 }
 
-fn is_img(file: &str) -> bool {
-	match get_extension_from_filename(&file).unwrap() {
-		"png" => true,
-		"jpg" => true,
-		"jpeg" => true,
-		"jpe" => true,
-		"gif" => true,
+fn is_img(file: &Path) -> bool {
+	match from_filepath(file).unwrap() {
+		"image/png" => true,
+		"image/jpeg" => true,
+		"image/gif" => true,
 		_ => false,
 	}
 }
 
 fn rand(path: String) -> String {
-	let num = rand::thread_rng().gen_range(0..path.len());
-	dir(path).into_iter().nth(num).unwrap()
+	let valid = dir(path);
+	let num = rand::thread_rng().gen_range(0..valid.len());
+	valid.into_iter().nth(num).unwrap()
 }
