@@ -25,10 +25,8 @@ pub fn export(dict: &ColorDict) {
 		new_data = parameters(new_data, "background".to_string(), &dict.background);
 		new_data = parameters(new_data, "cursor".to_string(), &dict.cursor);
 
-		let mut i = 0;
-		for entry in dict.colorvec.to_vec() {
+		for (i, entry) in dict.colorvec.to_vec().into_iter().enumerate() {
 			new_data = parameters(new_data, format!("color{}", i), &entry);
-			i += 1;
 		}
 
 		write(path.replace("/.config/", "/.cache/"), new_data).expect("write failed");

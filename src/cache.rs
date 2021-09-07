@@ -18,8 +18,8 @@ pub fn writecache(dict: &ColorDict) {
 
 pub fn readcache(path: &str, alpha: &usize) -> ColorDict {
 	let cachedir = format!("{}/.cache/wal/palette/", home_dir().unwrap().display().to_string());
-	let data = read_to_string(format!("{}{}", cachedir, &path.replace('/', "%"))).unwrap_or(String::new());
-	if data != "" {
+	let data = read_to_string(format!("{}{}", cachedir, &path.replace('/', "%"))).unwrap_or_default();
+	if !data.is_empty() {
 		let mut ln = data.lines();
 		let mut dict = ColorDict::new();
 		let mut i = 0;

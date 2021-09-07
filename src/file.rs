@@ -5,7 +5,7 @@ pub fn file(path: String) -> String {
 	let pathdir = Path::new(&path);
 	if pathdir.is_dir() {
 		rand(path)
-	} else if pathdir.is_file() && is_img(&pathdir) {
+	} else if pathdir.is_file() && is_img(pathdir) {
 		path
 	} else {
 		println!("Path does not point to a valid file/directory");
@@ -25,15 +25,7 @@ fn dir(path: String) -> Vec<String> {
 }
 
 fn is_img(file: &Path) -> bool {
-	match from_filepath(file).unwrap() {
-		"image/jpeg" => true,
-		"image/png" => true,
-		"image/avif" => true,
-		"image/bmp" => true,
-		"image/webp" => true,
-		"image/tiff" => true,
-		_ => false,
-	}
+	matches!(from_filepath(file).unwrap(), "image/jpeg" | "image/png" | "image/avif" | "image/bmp" | "image/webp" | "image/tiff")
 }
 
 fn rand(path: String) -> String {

@@ -48,7 +48,7 @@ fn main() {
 	if !args.nocache {
 		dict = readcache(&img, &args.alpha);
 	}
-	if dict.background.len() == 0 {
+	if dict.background.is_empty() {
 		dict = colors(img, args.style, args.alpha);
 		if !args.nocache {
 			writecache(&dict);

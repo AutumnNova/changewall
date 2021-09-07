@@ -1,11 +1,9 @@
 use super::super::colors::colordict::ColorDict;
 pub fn seq(dict: ColorDict, vte: bool) -> String {
 	let mut temp: String = String::new();
-	let mut i = 0;
 
-	for entry in &dict.colorvec {
+	for (i, entry) in dict.colorvec.iter().enumerate() {
 		temp.push_str(&set_color(i, entry));
-		i += 1;
 	}
 
 	temp.push_str(&set_special(10, &dict.foreground));

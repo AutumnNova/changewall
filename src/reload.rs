@@ -25,7 +25,7 @@ pub fn reload(dict: ColorDict, skip: String, vte: bool, feh: bool, setting: Stri
 		}
 	}
 
-	if skip == "" {
+	if skip.is_empty() {
 		reload_checked(dict, proc, vte, feh, setting)
 	} else {
 		reload_checked_skips(dict, skip, proc, vte, feh, setting)
@@ -125,10 +125,10 @@ fn sway() {
 
 fn wallpaper(path: &str, usefeh: bool, setting: String) {
 	if usefeh {
-		droppedcmd(&["feh", "--no-fehbg", &format!("--bg-{}", validate_setting(setting)), &path]);
+		droppedcmd(&["feh", "--no-fehbg", &format!("--bg-{}", validate_setting(setting)), path]);
 	} else {
 		let path = Path::new(&path);
-		Xlib::set(&Xlib::new().unwrap(), path, mime2format(&path)).unwrap();
+		Xlib::set(&Xlib::new().unwrap(), path, mime2format(path)).unwrap();
 	}
 }
 
@@ -163,11 +163,5 @@ fn mime2format(path: &Path) -> Option<ImageFormat> {
 }
 
 fn is_setting(setting: &str) -> bool {
-	match setting {
-		"center" => true,
-		"fill" => true,
-		"scale" => true,
-		"tile" => true,
-		_ => false,
-	}
+	matches!(setting, "center" | "fill" | "scale" | "tile")
 }

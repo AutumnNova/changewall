@@ -17,3 +17,4 @@ tree_magic_mini = { version = "^3.0", features = ["tree_magic_db"] }
 wall = "0.2.3"
 color-thief = "^0.2"
 image = "^0.23"
+palette = "^0.6"
