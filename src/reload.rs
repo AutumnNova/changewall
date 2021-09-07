@@ -5,9 +5,9 @@ use nix::{sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}}, unistd::Pid};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
 use seq::seq;
+use std::{fs::{read_dir, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
 use tree_magic_mini::from_filepath;
 use wall::xlib::{ImageFormat, Xlib};
-use std::{fs::{read_dir, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
 
 pub fn reload(dict: ColorDict, skip: String, vte: bool, feh: bool, setting: String) {
 	if skip == "a" {
@@ -33,7 +33,7 @@ pub fn reload(dict: ColorDict, skip: String, vte: bool, feh: bool, setting: Stri
 }
 
 fn reload_checked(dict: ColorDict, proc: String, vte: bool, usefeh: bool, setting: String) {
-	feh(&dict.wallpaper, usefeh, setting);
+	wallpaper(&dict.wallpaper, usefeh, setting);
 	pts(dict, vte, true);
 	xrdb();
 	if proc.contains('p') {
@@ -52,7 +52,7 @@ fn reload_checked(dict: ColorDict, proc: String, vte: bool, usefeh: bool, settin
 
 fn reload_checked_skips(dict: ColorDict, skip: String, proc: String, vte: bool, usefeh: bool, setting: String) {
 	if !skip.contains('w') {
-		feh(&dict.wallpaper, usefeh, setting);
+		wallpaper(&dict.wallpaper, usefeh, setting);
 	}
 	if !skip.contains('t') {
 		pts(dict, vte, !skip.contains('e'));
@@ -123,7 +123,7 @@ fn sway() {
 	droppedcmd(&["swaymsg", "reload"]);
 }
 
-fn feh(path: &str, usefeh: bool, setting: String) {
+fn wallpaper(path: &str, usefeh: bool, setting: String) {
 	if usefeh {
 		droppedcmd(&["feh", "--no-fehbg", &format!("--bg-{}", validate_setting(setting)), &path]);
 	} else {
@@ -154,7 +154,10 @@ fn mime2format(path: &Path) -> Option<ImageFormat> {
 	match from_filepath(path).unwrap() {
 		"image/jpeg" => Some(ImageFormat::Jpeg),
 		"image/png" => Some(ImageFormat::Png),
-		"image/gif" => Some(ImageFormat::Gif),
+		"image/avif" => Some(ImageFormat::Avif),
+		"image/bmp" => Some(ImageFormat::Bmp),
+		"image/webp" => Some(ImageFormat::WebP),
+		"image/tiff" => Some(ImageFormat::Tiff),
 		_ => None,
 	}
 }

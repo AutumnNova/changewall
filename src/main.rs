@@ -1,13 +1,13 @@
 mod cache;
 mod colors;
 mod export;
-mod image;
+mod file;
 mod preview;
 mod reload;
 use cache::{readcache, writecache};
 use colors::{colordict::ColorDict, colors};
 use export::export;
-use image::image;
+use file::file;
 use preview::preview;
 use reload::reload;
 use structopt::StructOpt;
@@ -43,7 +43,7 @@ struct Cli {
 fn main() {
 	let args = Cli::from_args();
 
-	let img = image(args.path);
+	let img = file(args.path);
 	let mut dict = ColorDict::new();
 	if !args.nocache {
 		dict = readcache(&img, &args.alpha);

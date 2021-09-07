@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::{fs::read_dir, path::Path, process::exit};
 use tree_magic_mini::from_filepath;
-pub fn image(path: String) -> String {
+pub fn file(path: String) -> String {
 	let pathdir = Path::new(&path);
 	if pathdir.is_dir() {
 		rand(path)
@@ -26,9 +26,12 @@ fn dir(path: String) -> Vec<String> {
 
 fn is_img(file: &Path) -> bool {
 	match from_filepath(file).unwrap() {
-		"image/png" => true,
 		"image/jpeg" => true,
-		"image/gif" => true,
+		"image/png" => true,
+		"image/avif" => true,
+		"image/bmp" => true,
+		"image/webp" => true,
+		"image/tiff" => true,
 		_ => false,
 	}
 }
