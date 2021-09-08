@@ -25,10 +25,10 @@ pub fn reload(dict: ColorDict, skip: String, vte: bool) {
 		}
 	}
 
-	reload_checked(dict, skip, proc, vte)
+	reload_progs(dict, skip, proc, vte)
 }
 
-fn reload_checked(dict: ColorDict, skip: String, proc: String, vte: bool) {
+fn reload_progs(dict: ColorDict, skip: String, proc: String, vte: bool) {
 	if !skip.contains('w') {
 		wallpaper(&dict.wallpaper);
 	}
