@@ -40,8 +40,6 @@ pub fn rgb2yiq(rgb: Rgb) -> Vec<i16> {
 pub fn darken_color(rgb: Rgb, amp: f32) -> Rgb {
 	let (r, g, b) = rgb.into_components();
 	Rgb::from_components((r * (1.0 - amp), g * (1.0 - amp), b * (1.0 - amp)))
-	//let (r, g, b) = (rgb.pop().unwrap() as f64 * (1f64 - amp), rgb.pop().unwrap() as f64 * (1f64 - amp), rgb.pop().unwrap() as f64 * (1f64 - amp));
-	//vec![b as u8, g as u8, r as u8]
 }
 
 pub fn blend_color(rgb1: Rgb, rgb2: Rgb) -> Rgb {

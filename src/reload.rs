@@ -9,7 +9,7 @@ use std::{fs::{read_dir, write}, path::Path, process::{Command, Stdio}, thread::
 use tree_magic_mini::from_filepath;
 use wall::xlib::{ImageFormat, Xlib};
 
-pub fn reload(dict: ColorDict, skip: String, vte: bool, feh: bool, setting: String) {
+pub fn reload(dict: ColorDict, skip: String, vte: bool) {
 	if skip == "a" {
 		return;
 	}
@@ -25,34 +25,12 @@ pub fn reload(dict: ColorDict, skip: String, vte: bool, feh: bool, setting: Stri
 		}
 	}
 
-	if skip.is_empty() {
-		reload_checked(dict, proc, vte, feh, setting)
-	} else {
-		reload_checked_skips(dict, skip, proc, vte, feh, setting)
-	}
+	reload_checked(dict, skip, proc, vte)
 }
 
-fn reload_checked(dict: ColorDict, proc: String, vte: bool, usefeh: bool, setting: String) {
-	wallpaper(&dict.wallpaper, usefeh, setting);
-	pts(dict, vte, true);
-	xrdb();
-	if proc.contains('p') {
-		polybar();
-	}
-	if proc.contains('d') {
-		dunst();
-	}
-	if proc.contains('i') {
-		i3();
-	}
-	if proc.contains('s') {
-		sway();
-	}
-}
-
-fn reload_checked_skips(dict: ColorDict, skip: String, proc: String, vte: bool, usefeh: bool, setting: String) {
+fn reload_checked(dict: ColorDict, skip: String, proc: String, vte: bool) {
 	if !skip.contains('w') {
-		wallpaper(&dict.wallpaper, usefeh, setting);
+		wallpaper(&dict.wallpaper);
 	}
 	if !skip.contains('t') {
 		pts(dict, vte, !skip.contains('e'));
@@ -123,13 +101,9 @@ fn sway() {
 	droppedcmd(&["swaymsg", "reload"]);
 }
 
-fn wallpaper(path: &str, usefeh: bool, setting: String) {
-	if usefeh {
-		droppedcmd(&["feh", "--no-fehbg", &format!("--bg-{}", validate_setting(setting)), path]);
-	} else {
-		let path = Path::new(&path);
-		Xlib::set(&Xlib::new().unwrap(), path, mime2format(path)).unwrap();
-	}
+fn wallpaper(path: &str) {
+	let path = Path::new(&path);
+	Xlib::set(&Xlib::new().unwrap(), path, mime2format(path)).unwrap();
 }
 
 fn droppedcmd(command: &[&str]) {
@@ -139,15 +113,6 @@ fn droppedcmd(command: &[&str]) {
 		.stdout(Stdio::null())
 		.stderr(Stdio::null())
 		.spawn();
-}
-
-fn validate_setting(setting: String) -> String {
-	if !is_setting(&setting) {
-		println!("Setting invalid, using default");
-		"fill".to_string()
-	} else {
-		setting
-	}
 }
 
 fn mime2format(path: &Path) -> Option<ImageFormat> {
@@ -160,8 +125,4 @@ fn mime2format(path: &Path) -> Option<ImageFormat> {
 		"image/tiff" => Some(ImageFormat::Tiff),
 		_ => None,
 	}
-}
-
-fn is_setting(setting: &str) -> bool {
-	matches!(setting, "center" | "fill" | "scale" | "tile")
 }

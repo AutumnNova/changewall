@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{thread_rng, Rng};
 use std::{fs::read_dir, path::Path, process::exit};
 use tree_magic_mini::from_filepath;
 pub fn file(path: String) -> String {
@@ -30,6 +30,6 @@ fn is_img(file: &Path) -> bool {
 
 fn rand(path: String) -> String {
 	let valid = dir(path);
-	let num = rand::thread_rng().gen_range(0..valid.len());
+	let num = thread_rng().gen_range(0..valid.len());
 	valid.into_iter().nth(num).unwrap()
 }

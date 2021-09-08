@@ -4,7 +4,7 @@ use std::fs::{create_dir_all, read_to_string, write};
 
 pub fn writecache(dict: &ColorDict) {
 	let cachedir = format!("{}/.cache/wal/palette/", home_dir().unwrap().display().to_string());
-	let _ = create_dir_all(&cachedir);
+	create_dir_all(&cachedir).unwrap();
 
 	let mut tmp = String::new();
 	for color in dict.colorvec.to_vec().into_iter() {
@@ -16,7 +16,7 @@ pub fn writecache(dict: &ColorDict) {
 	write(format!("{}{}", cachedir, dict.wallpaper.replace('/', "%")), tmp).expect("write failed");
 }
 
-pub fn readcache(path: &str, alpha: &usize) -> ColorDict {
+pub fn readcache(path: &str, alpha: &usize) -> Result<ColorDict, String> {
 	let cachedir = format!("{}/.cache/wal/palette/", home_dir().unwrap().display().to_string());
 	let data = read_to_string(format!("{}{}", cachedir, &path.replace('/', "%"))).unwrap_or_default();
 	if !data.is_empty() {
@@ -32,8 +32,8 @@ pub fn readcache(path: &str, alpha: &usize) -> ColorDict {
 		dict.cursor = ln.next().unwrap().to_string();
 		dict.wallpaper = path.to_string();
 		dict.alpha = *alpha;
-		dict
+		Ok(dict)
 	} else {
-		ColorDict::new()
+		Err("Failed to read cache".to_string())
 	}
 }

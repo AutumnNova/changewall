@@ -5,7 +5,7 @@ mod file;
 mod preview;
 mod reload;
 use cache::{readcache, writecache};
-use colors::{colordict::ColorDict, colors};
+use colors::colors;
 use export::export;
 use file::file;
 use preview::preview;
@@ -15,9 +15,6 @@ use structopt::StructOpt;
 struct Cli {
 	///path of wallpaper
 	path: String,
-	///value to be passed to feh, valid options are center, fill, scale and tile
-	#[structopt(default_value = "fill")]
-	setting: String,
 	///EXPERIMENTAL: enables a different color style which has 16 unique colors, instead of just the 9
 	#[structopt(short = "n", long = "newstyle")]
 	style: bool,
@@ -36,26 +33,27 @@ struct Cli {
 	///Disable read/write of cache file
 	#[structopt(long)]
 	nocache: bool,
-	#[structopt(long = "usefeh")]
-	feh: bool,
 }
 
 fn main() {
 	let args = Cli::from_args();
 
-	let img = file(args.path);
-	let mut dict = ColorDict::new();
-	if !args.nocache {
-		dict = readcache(&img, &args.alpha);
-	}
-	if dict.background.is_empty() {
-		dict = colors(img, args.style, args.alpha);
-		if !args.nocache {
-			writecache(&dict);
+	let img = file(args.path.clone());
+
+	let dict = {
+		if args.nocache {
+			colors(img, args.style, args.alpha)
+		} else {
+			readcache(&img, &args.alpha).unwrap_or_else(|_| colors(img, args.style, args.alpha))
 		}
+	};
+
+	if !args.nocache {
+		writecache(&dict);
 	}
+
 	export(&dict);
-	reload(dict, args.skip, args.vte, args.feh, args.setting);
+	reload(dict, args.skip, args.vte);
 	if args.preview {
 		preview()
 	}

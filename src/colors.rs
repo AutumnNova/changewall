@@ -3,9 +3,9 @@ pub mod convert;
 use color_thief::{get_palette, Color, ColorFormat};
 use colordict::ColorDict;
 use convert::{blend_color, darken_color, darken_color_checked, rgb2hex, rgb2yiq};
-use image::{ColorType, GenericImageView, imageops::FilterType, open};
+use image::{imageops::FilterType, open, ColorType, GenericImageView};
 use palette::rgb::Rgb;
-use std::{path::Path, process::{Command, exit}};
+use std::{path::Path, process::{exit, Command}};
 
 pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
 	let uselegacy = true;
@@ -23,9 +23,9 @@ fn gen_colors(file: &str, uselegacy: bool) -> Vec<Rgb> {
 				let tmp = line.replace('(', "").replace(')', "").split(' ').nth(1).unwrap().to_string();
 				let mut tmp2 = tmp.split(',');
 				let color: Rgb = Rgb::new(
-					tmp2.next().unwrap().to_string().parse::<f32>().unwrap() / 255.0,
-					tmp2.next().unwrap().to_string().parse::<f32>().unwrap() / 255.0,
-					tmp2.next().unwrap().to_string().parse::<f32>().unwrap() / 255.0,
+					tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
+					tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
+					tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
 				);
 				temp.insert(0, color);
 			}
@@ -131,12 +131,10 @@ fn find_color(t: ColorType) -> ColorFormat {
 fn format(colors: Vec<Rgb>, wallpaper: String, style: bool, uselegacy: bool, alpha: usize) -> ColorDict {
 	let mut temp = Vec::new();
 	if uselegacy && !style {
-		let mut i = 15;
-		for col in colors.into_iter() {
-			if i > 7 || i == 0 {
+		for (i, col) in colors.into_iter().enumerate() {
+			if i < 8 || i == 15 {
 				temp.insert(0, rgb2hex(col));
 			}
-			i -= 1;
 		}
 		temp.append(&mut temp.to_vec());
 		temp.remove(9);

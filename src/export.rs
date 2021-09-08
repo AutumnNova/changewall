@@ -5,14 +5,15 @@ use std::fs::{create_dir_all, read_dir, read_to_string, write};
 pub fn export(dict: &ColorDict) {
 	let templatedir = format!("{}/.config/wal/", home_dir().unwrap().display().to_string());
 
-	let _ = create_dir_all(&templatedir);
-	let _ = create_dir_all(&templatedir.replace("/.config/", "/.cache/"));
+	create_dir_all(&templatedir).unwrap();
+	create_dir_all(&templatedir.replace("/.config/", "/.cache/")).unwrap();
 
 	for file in read_dir(templatedir).unwrap() {
-		if file.as_ref().unwrap().path().is_dir() {
+		let file = file.unwrap().path();
+		if file.is_dir() {
 			continue;
 		}
-		let path = file.unwrap().path().display().to_string();
+		let path = file.display().to_string();
 		let dat = read_to_string(&path).unwrap();
 
 		// Run the replace operation in memory
