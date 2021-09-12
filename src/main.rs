@@ -10,33 +10,33 @@ use export::export;
 use file::file;
 use preview::preview;
 use reload::reload;
-use structopt::StructOpt;
-#[derive(StructOpt)]
-struct Cli {
+use clap::Clap;
+#[derive(Clap)]
+struct Opts {
 	///path of wallpaper
 	path: String,
 	///EXPERIMENTAL: enables a different color style which has 16 unique colors, instead of just the 9
-	#[structopt(short = "n", long = "newstyle")]
+	#[clap(short = 'n', long = "newstyle")]
 	style: bool,
 	///effects output of console escape seq and any values filled in via template
-	#[structopt(short, long, default_value = "100")]
+	#[clap(short, long, default_value = "100")]
 	alpha: usize,
 	///List of things to skip reloading. Valid options are: (t)erminal, (x)rdb, (p)olybar, (d)unst, (i)3, (s)way, (w)allpaper, s(e)q file, (a)ll
-	#[structopt(short, long, default_value = "")]
+	#[clap(short, long, default_value = "")]
 	skip: String,
 	///Skip setting esc seq 708, may fix artifacting in vte terms
-	#[structopt(short, long)]
+	#[clap(short, long)]
 	vte: bool,
 	///Preview current color theme
-	#[structopt(short, long)]
+	#[clap(short, long)]
 	preview: bool,
 	///Disable read/write of cache file
-	#[structopt(long)]
+	#[clap(long)]
 	nocache: bool,
 }
 
 fn main() {
-	let args = Cli::from_args();
+	let args = Opts::parse();
 
 	let img = file(args.path.clone());
 
