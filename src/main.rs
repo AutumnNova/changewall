@@ -5,12 +5,12 @@ mod file;
 mod preview;
 mod reload;
 use cache::{readcache, writecache};
+use clap::Clap;
 use colors::colors;
 use export::export;
 use file::file;
 use preview::preview;
 use reload::reload;
-use clap::Clap;
 #[derive(Clap)]
 struct Opts {
 	///path of wallpaper
@@ -21,7 +21,7 @@ struct Opts {
 	///effects output of console escape seq and any values filled in via template
 	#[clap(short, long, default_value = "100")]
 	alpha: usize,
-	///List of things to skip reloading. Valid options are: (t)erminal, (x)rdb, (p)olybar, (d)unst, (i)3, (s)way, (w)allpaper, s(e)q file, (a)ll
+	///List of things to skip reloading. Valid options are: (t)erminal, (p)olybar, (d)unst, (w)allpaper, (a)ll
 	#[clap(short, long, default_value = "")]
 	skip: String,
 	///Skip setting esc seq 708, may fix artifacting in vte terms
@@ -33,6 +33,9 @@ struct Opts {
 	///Disable read/write of cache file
 	#[clap(long)]
 	nocache: bool,
+	///Write file containing escape sequence to ~/.cache/wal/seq
+	#[clap(long)]
+	writeseq: bool,
 }
 
 fn main() {
@@ -53,7 +56,7 @@ fn main() {
 	}
 
 	export(&dict);
-	reload(dict, args.skip, args.vte);
+	reload(dict, args.skip, args.vte, args.writeseq);
 	if args.preview {
 		preview()
 	}

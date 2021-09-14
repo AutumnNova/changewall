@@ -5,8 +5,8 @@ use std::fs::{create_dir_all, read_dir, read_to_string, write};
 pub fn export(dict: &ColorDict) {
 	let templatedir = format!("{}/.config/wal/", home_dir().unwrap().display().to_string());
 
-	create_dir_all(&templatedir).unwrap();
-	create_dir_all(&templatedir.replace("/.config/", "/.cache/")).unwrap();
+	let _ = create_dir_all(&templatedir);
+	let _ = create_dir_all(&templatedir.replace("/.config/", "/.cache/"));
 
 	for file in read_dir(templatedir).unwrap() {
 		let file = file.unwrap().path();
@@ -14,9 +14,11 @@ pub fn export(dict: &ColorDict) {
 			continue;
 		}
 		let path = file.display().to_string();
+		if path.contains("reload.toml") {
+			continue;
+		}
 		let dat = read_to_string(&path).unwrap();
 
-		// Run the replace operation in memory
 		let mut new_data = dat
 			.replace("{wallpaper}", &dict.wallpaper)
 			.replace("{alpha}", &dict.alpha.to_string())

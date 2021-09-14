@@ -4,7 +4,7 @@ use std::fs::{create_dir_all, read_to_string, write};
 
 pub fn writecache(dict: &ColorDict) {
 	let cachedir = format!("{}/.cache/wal/palette/", home_dir().unwrap().display().to_string());
-	create_dir_all(&cachedir).unwrap();
+	let _ = create_dir_all(&cachedir);
 
 	let mut tmp = String::new();
 	for color in dict.colorvec.to_vec().into_iter() {

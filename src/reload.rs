@@ -1,54 +1,60 @@
+mod hooks;
 mod seq;
 use super::colors::colordict::ColorDict;
 use home::home_dir;
+use hooks::Reload;
 use nix::{sys::signal::{kill, Signal::{SIGKILL, SIGUSR1}}, unistd::Pid};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
 use seq::seq;
-use std::{fs::{read_dir, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
+use std::{fs::{read_dir, read_to_string, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
+use toml::from_str;
 use tree_magic_mini::from_filepath;
 use wall::xlib::{ImageFormat, Xlib};
 
-pub fn reload(dict: ColorDict, skip: String, vte: bool) {
+pub fn reload(dict: ColorDict, skip: String, vte: bool, writeseq: bool) {
+	let path = format!("{}/.config/wal/reload.toml", home_dir().unwrap().display().to_string());
+	let string = read_to_string(path).unwrap_or_default();
+	if !string.is_empty() {
+		let reload_hook: Reload = from_str(&string).unwrap();
+
+		for mut item in reload_hook.items.unwrap() {
+			if !which(&item.hook) {
+				item.args.insert(0, item.hook);
+				droppedcmd(&item.args)
+			}
+		}	
+	}
+
 	if skip == "a" {
 		return;
 	}
+
 	let mut proc = String::new();
 
 	for prc in all_processes().unwrap() {
 		match &*prc.stat.comm {
 			"dunst" => proc.push('d'),
 			"polybar" => proc.push('p'),
-			"i3" => proc.push('i'),
-			"sway" => proc.push('s'),
 			_ => (),
 		}
 	}
 
-	reload_progs(dict, skip, proc, vte)
+	reload_progs(dict, skip, proc, vte, writeseq)
 }
 
-fn reload_progs(dict: ColorDict, skip: String, proc: String, vte: bool) {
+fn reload_progs(dict: ColorDict, skip: String, proc: String, vte: bool, writeseq: bool) {
 	if !skip.contains('w') {
 		wallpaper(&dict.wallpaper);
 	}
 	if !skip.contains('t') {
-		pts(dict, vte, !skip.contains('e'));
-	}
-	if !skip.contains('x') {
-		xrdb();
+		pts(dict, vte, writeseq);
 	}
 	if proc.contains('p') && !skip.contains('p') {
 		polybar();
 	}
 	if proc.contains('d') && !skip.contains('d') {
 		dunst();
-	}
-	if proc.contains('i') && !skip.contains('i') {
-		i3();
-	}
-	if proc.contains('s') && !skip.contains('s') {
-		sway();
 	}
 }
 
@@ -89,25 +95,18 @@ fn polybar() {
 	}
 }
 
-fn xrdb() {
-	droppedcmd(&["xrdb", "-merge", &format!("{}/.cache/wal/colors.Xresources", home_dir().unwrap().display().to_string())]);
-}
-
-fn i3() {
-	droppedcmd(&["i3-msg", "reload"]);
-}
-
-fn sway() {
-	droppedcmd(&["swaymsg", "reload"]);
-}
-
 fn wallpaper(path: &str) {
 	let path = Path::new(&path);
 	Xlib::set(&Xlib::new().unwrap(), path, mime2format(path)).unwrap();
 }
 
-fn droppedcmd(command: &[&str]) {
-	let _ = Command::new(command[0])
+fn which(cmd: &str) -> bool {
+	let which = Command::new("which").arg(cmd).output().unwrap();
+	which.stderr.is_empty()
+}
+
+fn droppedcmd(command: &[String]) {
+	let _ = Command::new(&command[0])
 		.args(&command[1..])
 		.stdin(Stdio::null())
 		.stdout(Stdio::null())
