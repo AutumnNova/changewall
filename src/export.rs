@@ -1,44 +1,42 @@
-use super::colors::{colordict::ColorDict, convert::{hex2rgbdisplay, hex2xrgb}};
+mod traitdef;
+use super::colors::colordict::ColorDict;
+use anyhow::Result;
 use home::home_dir;
-use std::fs::{create_dir_all, read_dir, read_to_string, write};
+use std::fs::{create_dir_all, metadata, read_dir, read_to_string, write};
+use traitdef::Strparse;
 
-pub fn export(dict: &ColorDict) {
+pub fn export(dict: &ColorDict) -> Result<()> {
 	let templatedir = format!("{}/.config/wal/", home_dir().unwrap().display().to_string());
 
 	let _ = create_dir_all(&templatedir);
 	let _ = create_dir_all(&templatedir.replace("/.config/", "/.cache/"));
 
-	for file in read_dir(templatedir).unwrap() {
-		let file = file.unwrap().path();
-		if file.is_dir() {
-			continue;
-		}
-		let path = file.display().to_string();
-		if path.contains("reload.toml") {
-			continue;
-		}
-		let dat = read_to_string(&path).unwrap();
+	for file in read_dir(templatedir)? {
+		let file = file?.path();
+		let meta = metadata(&file);
 
-		let mut new_data = dat
+		if meta.is_err() || meta?.is_dir() {
+			continue;
+		}
+
+		if file.to_str().unwrap().contains("reload.toml") {
+			continue;
+		}
+
+		let mut dat = read_to_string(&file)?
 			.replace("{wallpaper}", &dict.wallpaper)
 			.replace("{alpha}", &dict.alpha.to_string())
-			.replace("{alpha.decimal}", &(dict.alpha / 100).to_string())
-			.replace("{background.alpha}", &format!("[{}]{}", dict.alpha, dict.background));
-		new_data = parameters(new_data, "foreground".to_string(), &dict.foreground);
-		new_data = parameters(new_data, "background".to_string(), &dict.background);
-		new_data = parameters(new_data, "cursor".to_string(), &dict.cursor);
+			.replace("{alpha.decimal}", &(dict.alpha as f32 / 100.0).to_string())
+			.replace("{background.alpha}", &format!("[{}]{}", dict.alpha, dict.background))
+			.replacedef("foreground", &dict.foreground)
+			.replacedef("background", &dict.background)
+			.replacedef("cursor", &dict.cursor);
 
 		for (i, entry) in dict.colorvec.to_vec().into_iter().enumerate() {
-			new_data = parameters(new_data, format!("color{}", i), &entry);
+			dat = dat.replacedef(&*format!("color{}", i), &entry);
 		}
 
-		write(path.replace("/.config/", "/.cache/"), new_data).expect("write failed");
+		write(file.to_str().unwrap().replace("/.config/", "/.cache/"), dat)?;
 	}
-}
-
-fn parameters(data: String, from: String, to: &str) -> String {
-	data.replace(&format!("{{{}}}", from), to)
-		.replace(&format!("{{{}.strip}}", from), to.strip_prefix('#').unwrap())
-		.replace(&format!("{{{}.rgb}}", from), &hex2rgbdisplay(to))
-		.replace(&format!("{{{}.xrgba}}", from), &hex2xrgb(to))
+	Ok(())
 }

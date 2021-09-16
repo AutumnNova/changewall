@@ -9,7 +9,7 @@ use std::{path::Path, process::{exit, Command}};
 
 pub fn colors(file: String, style: bool, alpha: usize) -> ColorDict {
 	let uselegacy = true;
-	format(adjust(gen_colors(&file, uselegacy), uselegacy), file.to_string(), style, uselegacy, alpha)
+	format(adjust(gen_colors(&file, uselegacy), uselegacy), file, style, uselegacy, alpha)
 }
 
 fn gen_colors(file: &str, uselegacy: bool) -> Vec<Rgb> {
@@ -85,10 +85,6 @@ fn adjust(colors: Vec<Rgb>, uselegacy: bool) -> Vec<Rgb> {
 		}
 	} else {
 		for rgb in colors {
-			match i {
-				// vec is inverted so 0=15, 1=14 and so on
-				_ => (),
-			}
 			temp.push(rgb);
 			i += 1;
 		}
