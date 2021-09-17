@@ -49,13 +49,13 @@ fn main() -> Result<()> {
 		if args.nocache {
 			colors(img, args.style, args.alpha)
 		} else {
-			readcache(&img, &args.alpha).unwrap_or_else(|_| colors(img, args.style, args.alpha))
+			readcache(&img, &args.alpha).unwrap_or_else(|_| {
+				let cache = colors(img, args.style, args.alpha);
+				writecache(&cache);
+				cache
+			})
 		}
 	};
-
-	if !args.nocache {
-		writecache(&dict);
-	}
 
 	export(&dict)?;
 	reload(dict, args.skip, args.vte, args.writeseq)?;
