@@ -23,7 +23,7 @@ struct Opts {
 	///effects output of console escape seq and any values filled in via template
 	#[clap(short, long, default_value = "100")]
 	alpha: usize,
-	///List of things to skip reloading. Valid options are: (t)erminal, (p)olybar, (d)unst, (w)allpaper, (a)ll
+	///List of things to skip reloading. Valid options are: (t)erminal, (d)unst, (w)allpaper, (h)ooks, (a)ll
 	#[clap(short, long, default_value = "")]
 	skip: String,
 	///Skip setting esc seq 708, may fix artifacting in some terms
