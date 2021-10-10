@@ -1,9 +1,9 @@
 use super::colordict::ColorDict;
 use super::convert::{blend_color, darken_color, darken_color_checked, rgb2hex};
 use palette::rgb::Rgb;
-use std::process::{exit, Command};
+use std::{path::Path, process::{exit, Command}};
 
-pub fn gen_colors(file: &str) -> Vec<Rgb> {
+pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 	let mut temp = Vec::new();
 	let mut i = 0;
 	while i <= 10 {
@@ -28,7 +28,7 @@ pub fn gen_colors(file: &str) -> Vec<Rgb> {
 	}
 
 	if i == 11 {
-		println!("Could not generate palette for {} within 10 attemps, Exiting", file);
+		println!("Could not generate palette for {} within 10 attemps, Exiting", file.to_str().unwrap());
 		exit(0)
 	}
 	temp
@@ -50,7 +50,7 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 	temp
 }
 
-pub fn format(colors: Vec<Rgb>, wallpaper: String, style: bool, alpha: usize) -> ColorDict {
+pub fn format(colors: Vec<Rgb>, wallpaper: &Path, style: bool, alpha: usize) -> ColorDict {
 	let mut temp = Vec::new();
 	if !style {
 		for (i, col) in colors.into_iter().enumerate() {
@@ -62,12 +62,12 @@ pub fn format(colors: Vec<Rgb>, wallpaper: String, style: bool, alpha: usize) ->
 		temp.remove(9);
 		temp.pop().unwrap();
 	}
-	ColorDict { wallpaper, alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
+	ColorDict { wallpaper: wallpaper.to_path_buf(), alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
 }
 
-fn imagemagick(file: &str, quant: u8) -> String {
+fn imagemagick(file: &Path, quant: u8) -> String {
 	let output = Command::new("magick")
-		.args([file, "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
+		.args([file.to_str().unwrap(), "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
 		.output()
 		.expect("failed to gather colors");
 

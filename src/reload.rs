@@ -8,7 +8,7 @@ use nix::{sys::signal::{kill, Signal::SIGKILL}, unistd::Pid};
 use notify_rust::{Notification, Urgency::Normal};
 use procfs::process::all_processes;
 use seq::seq;
-use std::{fs::{read_dir, read_to_string, write}, process::{Command, Stdio}, thread::sleep, time::Duration};
+use std::{fs::{read_dir, read_to_string, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
 use toml::from_str;
 
 pub fn reload(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
@@ -69,6 +69,7 @@ fn notif_daemon(pid: i32) -> Result<()> {
 		.summary("wal")
 		.body("Reloaded wal configurations!")
 		.urgency(Normal)
+		.id(1390764)
 		.show()
 		.unwrap();
 	Ok(())
@@ -88,8 +89,8 @@ fn pts(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
 	Ok(())
 }
 
-fn wallpaper(path: &str){
-	droppedcmd(&["feh".to_string(), "--no-fehbg".to_string(), "--bg-fill".to_string(), path.to_string()])
+fn wallpaper(path: &Path){
+	droppedcmd(&["feh".to_string(), "--no-fehbg".to_string(), "--bg-fill".to_string(), path.display().to_string()])
 }
 
 fn droppedcmd(command: &[String]) {

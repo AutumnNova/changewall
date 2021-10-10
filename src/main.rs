@@ -47,10 +47,10 @@ fn main() -> Result<()> {
 
 	let dict = {
 		if args.nocache {
-			colors(img, args.style, args.alpha)
+			colors(&img, args.style, args.alpha)
 		} else {
 			readcache(&img, &args.alpha).unwrap_or_else(|_| {
-				let cache = colors(img, args.style, args.alpha);
+				let cache = colors(&img, args.style, args.alpha);
 				writecache(&cache);
 				cache
 			})

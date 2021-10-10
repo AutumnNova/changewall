@@ -1,6 +1,8 @@
+use std::path::PathBuf;
+
 #[derive(Clone)]
 pub struct ColorDict {
-	pub wallpaper: String,
+	pub wallpaper: PathBuf,
 	pub alpha: usize,
 	pub background: String,
 	pub foreground: String,
@@ -9,15 +11,5 @@ pub struct ColorDict {
 }
 
 impl ColorDict {
-	#[inline]
-	pub const fn new() -> Self {
-		ColorDict {
-			wallpaper: String::new(),
-			alpha: 100,
-			background: String::new(),
-			foreground: String::new(),
-			cursor: String::new(),
-			colorvec: Vec::new(),
-		}
-	}
+	pub fn new(wallpaper: PathBuf, alpha: usize, background: String, foreground: String, cursor: String, colorvec: Vec<String>) -> Self { Self { wallpaper, alpha, background, foreground, cursor, colorvec } }
 }

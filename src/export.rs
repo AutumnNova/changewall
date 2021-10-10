@@ -24,7 +24,7 @@ pub fn export(dict: &ColorDict) -> Result<()> {
 		}
 
 		let mut dat = read_to_string(&file)?
-			.replace("{wallpaper}", &dict.wallpaper)
+			.replace("{wallpaper}", dict.wallpaper.to_str().unwrap())
 			.replace("{alpha}", &dict.alpha.to_string())
 			.replace("{alpha.decimal}", &(dict.alpha as f32 / 100.0).to_string())
 			.replace("{background.alpha}", &format!("[{}]{}", dict.alpha, dict.background))

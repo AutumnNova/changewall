@@ -5,7 +5,7 @@ use image::{imageops::FilterType, open, ColorType, GenericImageView};
 use palette::rgb::Rgb;
 use std::{path::Path, process::exit};
 
-pub fn gen_colors(file: &str) -> Vec<Rgb> {
+pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 	let mut temp = Vec::new();
 	let mut i = 0;
 	while i <= 10 {
@@ -27,7 +27,7 @@ pub fn gen_colors(file: &str) -> Vec<Rgb> {
 	}
 
 	if i == 11 {
-		println!("Could not generate palette for {} within 10 attemps, Exiting", file);
+		println!("Could not generate palette for {} within 10 attemps, Exiting", file.to_str().unwrap());
 		exit(0)
 	}
 	temp
@@ -35,24 +35,22 @@ pub fn gen_colors(file: &str) -> Vec<Rgb> {
 
 pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 	let mut temp = Vec::new();
-	let mut i = 0;
 	for rgb in colors {
 		temp.push(rgb);
-		i += 1;
 	}
 	temp
 }
 
-pub fn format(colors: Vec<Rgb>, wallpaper: String, _style: bool, alpha: usize) -> ColorDict {
+pub fn format(colors: Vec<Rgb>, wallpaper: &Path, _style: bool, alpha: usize) -> ColorDict {
 	let mut temp = Vec::new();
 	for color in colors.into_iter() {
 		temp.insert(0, rgb2hex(color));
 	}
-	ColorDict { wallpaper, alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
+	ColorDict { wallpaper: wallpaper.to_path_buf(), alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
 }
 
-fn colorthief(file: &str, quant: u8) -> Vec<Color> {
-	let img_path = open(&Path::new(file)).unwrap();
+fn colorthief(file: &Path, quant: u8) -> Vec<Color> {
+	let img_path = open(file).unwrap();
 	let dim = img_path.dimensions();
 	let (dim0, dim1) = ((dim.0 * 25) / 100, (dim.1 * 25) / 100);
 	get_palette(img_path.resize(dim0, dim1, FilterType::Triangle).as_bytes(), find_color(img_path.color()), 1, quant).unwrap()
