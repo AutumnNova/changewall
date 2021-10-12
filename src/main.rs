@@ -13,7 +13,7 @@ use file::file;
 use preview::preview;
 use reload::reload;
 #[derive(Parser)]
-#[clap(setting = AppSettings::ColoredHelp)]
+#[clap(setting = AppSettings::ColorAuto)]
 struct Opts {
 	///path to wallpaper
 	path: String,
