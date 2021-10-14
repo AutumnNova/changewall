@@ -6,14 +6,13 @@ mod preview;
 mod reload;
 use anyhow::Result;
 use cache::{readcache, writecache};
-use clap::{AppSettings, Parser};
+use clap::Parser;
 use colors::colors;
 use export::export;
 use file::file;
 use preview::preview;
 use reload::reload;
 #[derive(Parser)]
-#[clap(setting = AppSettings::ColorAuto)]
 struct Opts {
 	///path to wallpaper
 	path: String,
