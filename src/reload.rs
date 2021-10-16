@@ -4,11 +4,9 @@ use super::colors::colordict::ColorDict;
 use anyhow::{Context, Result};
 use home::home_dir;
 use hooks::Reload;
-use nix::{sys::signal::{kill, Signal::SIGKILL}, unistd::Pid};
 use notify_rust::{Notification, Urgency::Normal};
-use procfs::process::all_processes;
 use seq::seq;
-use std::{fs::{read_dir, read_to_string, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
+use std::{fs::{read_dir, read_to_string, write}, path::Path, process::{Command, Stdio}};
 use toml::from_str;
 
 pub fn reload(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
@@ -19,23 +17,13 @@ pub fn reload(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Resul
 	if !skip.contains('h') {
 		reload_hooks()?
 	}
-
-	let mut pid: i32 = -999;
-
-	for prc in all_processes()? {
-		if prc.stat.comm == "dunst" {
-			pid = prc.stat.pid;
-			break;
-		};
-	}
-
-	reload_progs(dict, skip, vte, writeseq, pid)?;
+	reload_progs(dict, skip, vte, writeseq)?;
 	Ok(())
 }
 
 fn reload_hooks() -> Result<()> {
-	let path = format!("{}/.config/wal/reload.toml", home_dir().unwrap().display().to_string());
-	let string = read_to_string(path).unwrap_or_default();
+	let path = home_dir().unwrap().join(".config/wal/reload.toml");
+	let string = read_to_string(path)?;
 	if !string.is_empty() {
 		let reload_hook: Reload = from_str(&string)?;
 
@@ -47,24 +35,20 @@ fn reload_hooks() -> Result<()> {
 	Ok(())
 }
 
-fn reload_progs(dict: ColorDict, skip: String, vte: bool, writeseq: bool, pid: i32) -> Result<()> {
+fn reload_progs(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
 	if !skip.contains('w') {
 		wallpaper(&dict.wallpaper);
 	}
 	if !skip.contains('t') {
 		pts(dict, vte, writeseq)?;
 	}
-	if pid != -999 && !skip.contains('d') {
-		notif_daemon(pid)?;
+	if !skip.contains('d') {
+		notif_daemon()?;
 	}
 	Ok(())
 }
 
-fn notif_daemon(pid: i32) -> Result<()> {
-	kill(Pid::from_raw(pid), SIGKILL).with_context(|| "Failed to send SIGKILL to notification daemon")?;
-
-	sleep(Duration::from_millis(1));
-
+fn notif_daemon() -> Result<()> {
 	Notification::new()
 		.summary("wal")
 		.body("Reloaded wal configurations!")
@@ -84,7 +68,7 @@ fn pts(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
 		}
 	}
 	if writeseq {
-		write(format!("{}/.cache/wal/seq", home_dir().unwrap().display().to_string()), seq).with_context(|| "Failed to write seq file")?;
+		write(home_dir().unwrap().join(".cache/wal/seq"), seq).with_context(|| "Failed to write seq file")?;
 	}
 	Ok(())
 }

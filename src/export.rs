@@ -2,24 +2,19 @@ mod traitdef;
 use super::colors::colordict::ColorDict;
 use anyhow::Result;
 use home::home_dir;
-use std::fs::{create_dir_all, metadata, read_dir, read_to_string, write};
+use std::fs::{create_dir_all, read_dir, read_to_string, write};
 use traitdef::Strparse;
 
 pub fn export(dict: &ColorDict) -> Result<()> {
-	let templatedir = format!("{}/.config/wal/", home_dir().unwrap().display().to_string());
+	let templatedir = home_dir().unwrap().join(".config/wal");
+	let cachedir = home_dir().unwrap().join(".cache/wal");
 
-	let _ = create_dir_all(&templatedir);
-	let _ = create_dir_all(&templatedir.replace("/.config/", "/.cache/"));
+	create_dir_all(&templatedir)?;
+	create_dir_all(&cachedir)?;
 
 	for file in read_dir(templatedir)? {
 		let file = file?.path();
-		let meta = metadata(&file);
-
-		if meta.is_err() || meta?.is_dir() {
-			continue;
-		}
-
-		if file.to_str().unwrap().contains("reload.toml") {
+		if file.is_dir() || file.file_name().unwrap() == "reload.toml" {
 			continue;
 		}
 
