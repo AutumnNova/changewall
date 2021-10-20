@@ -62,7 +62,6 @@ pub fn format(colors: Vec<Rgb>, wallpaper: &Path, style: bool, alpha: usize) -> 
 		temp.remove(9);
 		temp.pop().unwrap();
 	}
-	println!("{}", temp.len());
 	ColorDict { wallpaper: wallpaper.to_path_buf(), alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
 }
 
