@@ -14,7 +14,7 @@ notify-rust = "^4.5"
 rand = "^0.8"
 hex = "^0.4"
 home = "^0.5"
-tree_magic_mini = { version = "^3.0", features = ["tree_magic_db"] }
+tree_magic_mini = { version = "^3.0" }
 palette = "^0.6"
 clap = { git = "https://github.com/clap-rs/clap/" }
 toml = "^0.5"

@@ -6,7 +6,7 @@ use home::home_dir;
 use hooks::Reload;
 use notify_rust::{Notification, Urgency::Normal};
 use seq::seq;
-use std::{fs::{read_dir, read_to_string, write}, path::Path, process::{Command, Stdio}};
+use std::{fs::{read_dir, read_to_string, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
 use toml::from_str;
 
 pub fn reload(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
@@ -49,6 +49,9 @@ fn reload_progs(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Res
 }
 
 fn notif_daemon() -> Result<()> {
+
+	sleep(Duration::from_millis(1));
+
 	Notification::new()
 		.summary("wal")
 		.body("Reloaded wal configurations!")
