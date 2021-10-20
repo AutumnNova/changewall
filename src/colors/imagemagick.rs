@@ -4,7 +4,7 @@ use palette::rgb::Rgb;
 use std::{path::Path, process::{exit, Command}};
 
 pub fn gen_colors(file: &Path) -> Vec<Rgb> {
-	let mut temp = Vec::new();
+	let mut temp = Vec::with_capacity(16);
 	let mut i = 0;
 	while i <= 10 {
 		let raw_col = imagemagick(file, 16 + i);
@@ -35,7 +35,7 @@ pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 }
 
 pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
-	let mut temp = Vec::new();
+	let mut temp = Vec::with_capacity(16);
 	for (i, mut rgb) in colors.into_iter().enumerate() {
 		match i {
 			// vec is inverted so 0=15, 1=14 and so on
@@ -51,7 +51,7 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 }
 
 pub fn format(colors: Vec<Rgb>, wallpaper: &Path, style: bool, alpha: usize) -> ColorDict {
-	let mut temp = Vec::new();
+	let mut temp = Vec::with_capacity(16);
 	if !style {
 		for (i, col) in colors.into_iter().enumerate() {
 			if i < 8 || i == 15 {
@@ -62,6 +62,7 @@ pub fn format(colors: Vec<Rgb>, wallpaper: &Path, style: bool, alpha: usize) -> 
 		temp.remove(9);
 		temp.pop().unwrap();
 	}
+	println!("{}", temp.len());
 	ColorDict { wallpaper: wallpaper.to_path_buf(), alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
 }
 

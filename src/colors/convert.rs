@@ -13,19 +13,35 @@ pub fn hex2rgb(hex: &str) -> Rgb {
 
 pub fn hex2rgbdisplay(hex: &str) -> String {
 	let col = hex2rgb(hex);
-	format!("{},{},{}", col.red * 255.0, col.green * 255.0, col.blue * 255.0)
+	let mut temp = String::with_capacity(11);
+	temp.push_str(&(col.red * 255.0).to_string());
+	temp.push(',');
+	temp.push_str(&(col.green * 255.0).to_string());
+	temp.push(',');
+	temp.push_str(&(col.blue * 255.0).to_string());
+	temp
 }
 
 pub fn hex2xrgb(hex: &str) -> String {
 	let col = hex2rgb(hex);
-	format!("{}/{}/{}/ff", col.red * 255.0, col.green * 255.0, col.blue * 255.0)
+	let mut temp = String::with_capacity(14);
+	temp.push_str(&(col.red * 255.0).to_string());
+	temp.push('/');
+	temp.push_str(&(col.green * 255.0).to_string());
+	temp.push('/');
+	temp.push_str(&(col.blue * 255.0).to_string());
+	temp.push_str("/ff");
+	temp
 }
 
 pub fn rgb2hex(rgb: Rgb) -> String {
 	let (r, g, b) = rgb.into_components();
 	let color_u8: Vec<u8> = vec![(r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8];
 	let color_hex = encode(color_u8);
-	format!("#{}", color_hex)
+	let mut output = String::with_capacity(7);
+	output.push('#');
+	output.push_str(&color_hex);
+	output
 }
 
 #[allow(dead_code)]

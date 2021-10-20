@@ -20,6 +20,7 @@ clap = { git = "https://github.com/clap-rs/clap/" }
 toml = "^0.5"
 serde = "^1.0"
 anyhow = "^1.0"
+aho-corasick = "0.7"
 
 color-thief = { version = "^0.2", optional = true }
 image = { version = "^0.23", optional = true }
