@@ -6,12 +6,28 @@ mod preview;
 mod reload;
 use anyhow::Result;
 use cache::{readcache, writecache};
-use clap::Parser;
+use clap::{crate_authors, App, Arg, Parser, ValueHint};
 use colors::colors;
 use export::export;
 use file::file;
 use preview::preview;
 use reload::reload;
+
+fn build_cli() -> clap::App<'static> {
+	App::new("changewal").author(crate_authors!("\n"))
+	.args(&[
+		Arg::new("path").required_unless_present("zsh").about("Path to wallpaper or directory").value_hint(ValueHint::AnyPath),
+		Arg::new("alpha").short('a').long("alpha").default_value("100").about("Effects output of console escape seq and any values filled in via template"),
+		Arg::new("skip").short('s').long("skip").default_value("").hide_default_value(true).about("List of things to skip reloading. Valid options are: (t)erminal, (d)unst, (w)allpaper, (h)ooks, (a)ll"),
+		Arg::new("zsh").long("zsh").about("Print zsh completions to stdout and quit."),
+		Arg::new("style").short('n').long("newstyle").takes_value(false).about("EXPERIMENTAL: enables a different color style which has 16 unique colors, instead of just 9"),
+		Arg::new("vte").short('v').long("vte").takes_value(false).about("Skip setting esc seq 708, may fix artifacting in some terms"),
+		Arg::new("preview").short('p').long("preview").takes_value(false).about("Preview current color theme"),
+		Arg::new("nocache").long("nocache").takes_value(false).about("Disable read/write of cache file"),
+		Arg::new("writeseq").long("writeseq").takes_value(false).about("Write file containing escape sequence to ~/.cache/wal/seq"),
+	])
+}
+
 #[derive(Parser)]
 struct Opts {
 	///path to wallpaper
@@ -40,16 +56,18 @@ struct Opts {
 }
 
 fn main() -> Result<()> {
-	let args = Opts::parse();
+	let arg = build_cli().get_matches();
 
-	let img = file(args.path.clone())?;
+	let img = file(arg.value_of_t::<String>("path")?)?;
 
 	let dict = {
-		if args.nocache {
-			colors(&img, args.style, args.alpha)
+		let style = arg.is_present("style");
+		let alpha = arg.value_of_t::<usize>("alpha")?.min(100).max(0);
+		if arg.is_present("nocache") {
+			colors(img, style, alpha)
 		} else {
-			readcache(&img, &args.alpha).unwrap_or_else(|_| {
-				let cache = colors(&img, args.style, args.alpha);
+			readcache(&img, &alpha).unwrap_or_else(|_| {
+				let cache = colors(img, style, alpha);
 				writecache(&cache);
 				cache
 			})
@@ -57,8 +75,12 @@ fn main() -> Result<()> {
 	};
 
 	export(&dict)?;
-	reload(dict, args.skip, args.vte, args.writeseq)?;
-	if args.preview {
+	let skip = arg.value_of_t("skip")?;
+	let vte = arg.is_present("vte");
+	let writeseq = arg.is_present("writeseq");
+	reload(dict, skip, vte, writeseq)?;
+	let argpreview = arg.is_present("preview");
+	if argpreview {
 		preview()
 	}
 	Ok(())

@@ -6,7 +6,7 @@ use home::home_dir;
 use hooks::Reload;
 use notify_rust::{Notification, Urgency::Normal};
 use seq::seq;
-use std::{fs::{read_dir, read_to_string, write}, path::Path, process::{Command, Stdio}, thread::sleep, time::Duration};
+use std::{fs::{read_dir, read_to_string, write}, path::{Path, PathBuf}, process::{Command, Stdio}, thread::sleep, time::Duration};
 use toml::from_str;
 
 pub fn reload(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
@@ -66,7 +66,7 @@ fn pts(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
 	let seq = seq(dict, vte);
 	for dir in read_dir("/dev/pts/").with_context(|| "Failed to read /dev/pts/")? {
 		let file = dir?.path();
-		if !file.to_str().unwrap().contains("ptmx") {
+		if file != PathBuf::from("/dev/pts/ptmx") {
 			write(file, &seq).with_context(|| "Failed to write to /dev/pts/[0..]")?;
 		}
 	}

@@ -3,7 +3,7 @@ use super::convert::{rgb2hex, rgb2yiq};
 use color_thief::{get_palette, Color, ColorFormat};
 use image::{imageops::FilterType, open, ColorType, GenericImageView};
 use palette::rgb::Rgb;
-use std::{path::Path, process::exit};
+use std::{path::{Path, PathBuf}, process::exit};
 
 pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 	let mut temp = Vec::new();
@@ -41,12 +41,12 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 	temp
 }
 
-pub fn format(colors: Vec<Rgb>, wallpaper: &Path, _style: bool, alpha: usize) -> ColorDict {
+pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, _style: bool, alpha: usize) -> ColorDict {
 	let mut temp = Vec::new();
 	for color in colors.into_iter() {
 		temp.insert(0, rgb2hex(color));
 	}
-	ColorDict { wallpaper: wallpaper.to_path_buf(), alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
+	ColorDict { wallpaper, alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
 }
 
 fn colorthief(file: &Path, quant: u8) -> Vec<Color> {

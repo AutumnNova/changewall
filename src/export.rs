@@ -29,9 +29,9 @@ pub fn export(dict: &ColorDict) -> Result<()> {
 	}
 
 	let ac = AhoCorasickBuilder::new()
-	.match_kind(MatchKind::LeftmostFirst)
-	.auto_configure(PATTERN)
-	.build(PATTERN);
+		.match_kind(MatchKind::LeftmostFirst)
+		.auto_configure(PATTERN)
+		.build(PATTERN);
 
 	for file in read_dir(templatedir)? {
 		let file = file?.path();

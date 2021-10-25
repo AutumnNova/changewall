@@ -1,7 +1,7 @@
 use super::colordict::ColorDict;
 use super::convert::{blend_color, darken_color, darken_color_checked, rgb2hex};
 use palette::rgb::Rgb;
-use std::{path::Path, process::{exit, Command}};
+use std::{path::{Path, PathBuf}, process::{exit, Command}};
 
 pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 	let mut temp = Vec::with_capacity(16);
@@ -50,19 +50,25 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 	temp
 }
 
-pub fn format(colors: Vec<Rgb>, wallpaper: &Path, style: bool, alpha: usize) -> ColorDict {
-	let mut temp = Vec::with_capacity(16);
+pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, style: bool, alpha: usize) -> ColorDict {
+	let mut colorvec = Vec::with_capacity(16);
 	if !style {
 		for (i, col) in colors.into_iter().enumerate() {
 			if i < 8 || i == 15 {
-				temp.insert(0, rgb2hex(col));
+				colorvec.insert(0, rgb2hex(col));
 			}
 		}
-		temp.append(&mut temp.to_vec());
-		temp.remove(9);
-		temp.pop().unwrap();
+		colorvec.append(&mut colorvec.to_vec());
+		colorvec.remove(9);
+		colorvec.pop().unwrap();
 	}
-	ColorDict { wallpaper: wallpaper.to_path_buf(), alpha, background: temp.to_vec().into_iter().next().unwrap(), foreground: temp.to_vec().into_iter().nth(15).unwrap(), cursor: temp.to_vec().into_iter().nth(15).unwrap(), colorvec: temp }
+	let (background, foreground, cursor) = {
+		let mut tempclone = colorvec.to_vec().into_iter();
+		let multi = tempclone.nth_back(0).unwrap();
+		(tempclone.next().unwrap(), multi.clone(), multi)
+	};
+
+	ColorDict { wallpaper, alpha, background, foreground, cursor, colorvec }
 }
 
 fn imagemagick(file: &Path, quant: u8) -> String {

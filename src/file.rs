@@ -14,12 +14,12 @@ pub fn file(path: String) -> Result<PathBuf> {
 	}
 }
 
-fn dir(path: PathBuf) -> Result<Vec<String>> {
+fn dir(path: PathBuf) -> Result<Vec<PathBuf>> {
 	let mut vec = vec![];
 	for dir in read_dir(path)? {
 		let file = dir?.path();
 		if is_img(&file) {
-			vec.push(file.display().to_string());
+			vec.push(file);
 		}
 	}
 	Ok(vec)
@@ -32,5 +32,5 @@ fn is_img(file: &Path) -> bool {
 fn rand(path: PathBuf) -> Result<PathBuf> {
 	let valid = dir(path)?;
 	let num = thread_rng().gen_range(0..valid.len());
-	Ok(PathBuf::from(valid.into_iter().nth(num).unwrap()))
+	Ok(valid.into_iter().nth(num).unwrap())
 }
