@@ -7,17 +7,7 @@ pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 	let mut temp = Vec::with_capacity(16);
 	let mut i = 0;
 	while i <= 10 {
-		let raw_col = imagemagick(file, 16 + i);
-		for line in raw_col.lines().skip(1) {
-			let tmp = line.replace('(', "").replace(')', "").split(' ').nth(1).unwrap().to_string();
-			let mut tmp2 = tmp.split(',');
-			let color: Rgb = Rgb::new(
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-			);
-			temp.insert(0, color);
-		}
+		temp.imagemagick(file, 16 + i);
 
 		if temp.len() >= 16 {
 			break;
@@ -50,9 +40,9 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 	temp
 }
 
-pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, style: bool, alpha: usize) -> ColorDict {
+pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, alpha: u8) -> ColorDict {
 	let mut colorvec = Vec::with_capacity(16);
-	if !style {
+
 		for (i, col) in colors.into_iter().enumerate() {
 			if i < 8 || i == 15 {
 				colorvec.insert(0, rgb2hex(col));
@@ -61,21 +51,58 @@ pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, style: bool, alpha: usize) -
 		colorvec.append(&mut colorvec.to_vec());
 		colorvec.remove(9);
 		colorvec.pop().unwrap();
+		let fg = colorvec.get(15).unwrap().clone();
+
+	ColorDict::new(wallpaper, alpha, &colorvec.get(0).unwrap().clone(), &fg, &fg, colorvec)
+}
+
+trait MagickGen {
+	fn imagemagick(&mut self, file: &Path, quant: u8);
+}
+
+impl MagickGen for Vec<Rgb> {
+	fn imagemagick(&mut self, file: &Path, quant: u8) {
+	
+		let output = Command::new("magick")
+			.args([file.to_str().unwrap(), "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
+			.output()
+			.expect("failed to gather colors");
+	
+		for line in String::from_utf8_lossy(&output.stdout).to_string().lines().skip(1) {
+			let tmp = line.replace('(', "").replace(')', "").split(' ').nth(1).unwrap().to_string();
+			let mut tmp2 = tmp.split(',');
+			let color: Rgb = Rgb::new(
+				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
+				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
+				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
+			);
+			self.insert(0, color);
+		}
 	}
-	let (background, foreground, cursor) = {
-		let mut tempclone = colorvec.to_vec().into_iter();
-		let multi = tempclone.nth_back(0).unwrap();
-		(tempclone.next().unwrap(), multi.clone(), multi)
-	};
-
-	ColorDict { wallpaper, alpha, background, foreground, cursor, colorvec }
 }
 
-fn imagemagick(file: &Path, quant: u8) -> String {
-	let output = Command::new("magick")
-		.args([file.to_str().unwrap(), "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
-		.output()
-		.expect("failed to gather colors");
+/*fn graphicsmagick(file: &Path, quant: u8) -> Result<Vec<Rgb>> {
+	let mut temp = Vec::with_capacity(16);
+	graphicsmagick::initialize();
+	let x =  MagickWand::new().read_image(&file.to_path_buf().to_string_lossy())?.get_image_width();
+	let y =  MagickWand::new().read_image(&file.to_path_buf().to_string_lossy())?.get_image_height();
 
-	String::from_utf8_lossy(&output.stdout).to_string()
-}
+		let mut mw = MagickWand::new();
+	let mw = mw.read_image(&file.to_path_buf().to_string_lossy())?.resize_image((x as f64 * 0.01) as u64, (y as f64 * 0.01) as u64, FilterTypes::MitchellFilter, 0.5)?.quantize_image(quant.into(), graphicsmagick::types::ColorspaceType::RGBColorspace, 1, 1, 1)?;
+
+	let mut i = 0;
+	while i != 16 {
+		let pixel = mw.get_image_colormap_color(i)?;
+		let r = pixel.get_red();
+		let g = pixel.get_green();
+		let b = pixel.get_blue();
+
+		let color: Rgb = Rgb::new(r as f32, g as f32, b as f32);
+		temp.insert(0, color);
+
+		
+		i += 1;
+	}
+
+	Ok(temp)
+}*/

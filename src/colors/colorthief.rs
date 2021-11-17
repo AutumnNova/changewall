@@ -41,7 +41,7 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 	temp
 }
 
-pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, _style: bool, alpha: usize) -> ColorDict {
+pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, _style: bool, alpha: u8) -> ColorDict {
 	let mut temp = Vec::new();
 	for color in colors.into_iter() {
 		temp.insert(0, rgb2hex(color));

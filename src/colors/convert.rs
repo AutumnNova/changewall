@@ -12,24 +12,26 @@ pub fn hex2rgb(hex: &str) -> Rgb {
 }
 
 pub fn hex2rgbdisplay(hex: &str) -> String {
+	let mut buf = ryu::Buffer::new();
 	let col = hex2rgb(hex);
 	let mut temp = String::with_capacity(11);
-	temp.push_str(&(col.red * 255.0).to_string());
+	temp.push_str(buf.format_finite(col.red * 255.0));
 	temp.push(',');
-	temp.push_str(&(col.green * 255.0).to_string());
+	temp.push_str(buf.format_finite(col.green * 255.0));
 	temp.push(',');
-	temp.push_str(&(col.blue * 255.0).to_string());
+	temp.push_str(buf.format_finite(col.blue * 255.0));
 	temp
 }
 
 pub fn hex2xrgb(hex: &str) -> String {
+	let mut buf = ryu::Buffer::new();
 	let col = hex2rgb(hex);
 	let mut temp = String::with_capacity(14);
-	temp.push_str(&(col.red * 255.0).to_string());
+	temp.push_str(buf.format_finite(col.red * 255.0));
 	temp.push('/');
-	temp.push_str(&(col.green * 255.0).to_string());
+	temp.push_str(buf.format_finite(col.green * 255.0));
 	temp.push('/');
-	temp.push_str(&(col.blue * 255.0).to_string());
+	temp.push_str(buf.format_finite(col.blue * 255.0));
 	temp.push_str("/ff");
 	temp
 }
@@ -45,13 +47,13 @@ pub fn rgb2hex(rgb: Rgb) -> String {
 }
 
 #[allow(dead_code)]
-pub fn rgb2yiq(rgb: Rgb) -> Vec<i16> {
-	let (r, g, b) = rgb.into_components();
-	let (r, g, b) = (r / 255.0, g / 255.0, b / 255.0);
-	let y = 0.30 * r + 0.59 * g + 0.11 * b;
-	let i = 0.74 * (r - y) - 0.27 * (b - y);
-	let q = 0.48 * (r - y) + 0.41 * (b - y);
-	vec![q as i16, i as i16, y as i16]
+pub fn rgb2yiq(rgb: Rgb) -> Vec<i64> {
+	let (red, green, blue) = rgb.into_components();
+	let (red, green, blue) = (red / 255.0, green / 255.0, blue / 255.0);
+	let y = 0.30 * red + 0.59 * green + 0.11 * blue;
+	let i = 0.74 * (red - y) - 0.27 * (blue - y);
+	let q = 0.48 * (red - y) + 0.41 * (blue - y);
+	vec![(q * 100.0) as i64, (i * 100.0) as i64, (y * 100.0) as i64]
 }
 
 #[allow(dead_code)]

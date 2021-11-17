@@ -37,10 +37,10 @@ fn reload_hooks() -> Result<()> {
 
 fn reload_progs(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
 	if !skip.contains('w') {
-		wallpaper(&dict.wallpaper);
+		set_wallpaper(&dict.wallpaper);
 	}
 	if !skip.contains('t') {
-		pts(dict, vte, writeseq)?;
+		reload_terms(dict, vte, writeseq)?;
 	}
 	if !skip.contains('d') {
 		notif_daemon()?;
@@ -49,7 +49,6 @@ fn reload_progs(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Res
 }
 
 fn notif_daemon() -> Result<()> {
-
 	sleep(Duration::from_millis(1));
 
 	Notification::new()
@@ -57,12 +56,11 @@ fn notif_daemon() -> Result<()> {
 		.body("Reloaded wal configurations!")
 		.urgency(Normal)
 		.id(1390764)
-		.show()
-		.unwrap();
+		.show()?;
 	Ok(())
 }
 
-fn pts(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
+fn reload_terms(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
 	let seq = seq(dict, vte);
 	for dir in read_dir("/dev/pts/").with_context(|| "Failed to read /dev/pts/")? {
 		let file = dir?.path();
@@ -76,7 +74,7 @@ fn pts(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
 	Ok(())
 }
 
-fn wallpaper(path: &Path){
+fn set_wallpaper(path: &Path){
 	droppedcmd(&["feh".to_string(), "--no-fehbg".to_string(), "--bg-fill".to_string(), path.display().to_string()])
 }
 

@@ -1,9 +1,8 @@
 use std::path::PathBuf;
 
-#[derive(Clone)]
 pub struct ColorDict {
 	pub wallpaper: PathBuf,
-	pub alpha: usize,
+	pub alpha: u8,
 	pub background: String,
 	pub foreground: String,
 	pub cursor: String,
@@ -11,5 +10,5 @@ pub struct ColorDict {
 }
 
 impl ColorDict {
-	pub fn new(wallpaper: PathBuf, alpha: usize, background: String, foreground: String, cursor: String, colorvec: Vec<String>) -> Self { Self { wallpaper, alpha, background, foreground, cursor, colorvec } }
+	pub fn new<S: Into<String>, P: Into<PathBuf>> (wallpaper: P, alpha: u8, background: S, foreground: S, cursor: S, colorvec: Vec<String>) -> Self { Self { wallpaper: wallpaper.into(), alpha, background: background.into(), foreground: foreground.into(), cursor: cursor.into(), colorvec } }
 }

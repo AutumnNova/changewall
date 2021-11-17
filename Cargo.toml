@@ -5,10 +5,6 @@ edition = "2021"
 license = "GPL-3.0-or-later"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[profile.release]
-lto = true
-codegen-units = 1
-
 [dependencies]
 notify-rust = "~4.5"
 rand = "~0.8"
@@ -21,11 +17,14 @@ toml = "~0.5"
 serde = "~1.0"
 anyhow = "~1.0"
 aho-corasick = "~0.7"
+ryu = "~1.0"
 
 color-thief = { version = "~0.2", optional = true }
 image = { version = "~0.23", optional = true }
+chrono = { version = "~0.4", optional = true }
+sunrise = { version = "~1.0", optional = true }
 
 [features]
-default = ["imagemagick"]
+default = ["timechange"]
 colorthief = ["color-thief", "image"]
-imagemagick = []
+timechange = ["chrono", "sunrise"]
