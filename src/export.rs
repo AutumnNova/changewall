@@ -19,10 +19,10 @@ pub fn export(dict: &ColorDict) -> Result<()> {
 	value_vec.push(dict.wallpaper.to_string_lossy().to_string());
 	value_vec.push(dict.alpha.to_string());
 	value_vec.push(ryu::Buffer::new().format_finite(dict.alpha as f32 / 100.0).to_string());
-	value_vec.push(format!("[{}]{}", dict.alpha, dict.background));
-	value_vec.push_variants(&dict.foreground);
-	value_vec.push_variants(&dict.background);
-	value_vec.push_variants(&dict.cursor);
+	value_vec.push(format!("[{}]{}", dict.alpha, dict.colorvec[0]));
+	value_vec.push_variants(&dict.colorvec[15]);
+	value_vec.push_variants(&dict.colorvec[0]);
+	value_vec.push_variants(&dict.colorvec[15]);
 
 	for entry in dict.colorvec.iter() {
 		value_vec.push_variants(entry);

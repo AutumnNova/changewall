@@ -1,7 +1,10 @@
+mod traitdef;
+use super::colordict::to_array;
 use super::colordict::ColorDict;
 use super::convert::{blend_color, darken_color, darken_color_checked, rgb2hex};
 use palette::rgb::Rgb;
-use std::{path::{Path, PathBuf}, process::{exit, Command}};
+use std::{path::{Path, PathBuf}, process::exit};
+use traitdef::MagickGen;
 
 pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 	let mut temp = Vec::with_capacity(16);
@@ -43,42 +46,15 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, alpha: u8) -> ColorDict {
 	let mut colorvec = Vec::with_capacity(16);
 
-		for (i, col) in colors.into_iter().enumerate() {
-			if i < 8 || i == 15 {
-				colorvec.insert(0, rgb2hex(col));
-			}
-		}
-		colorvec.append(&mut colorvec.to_vec());
-		colorvec.remove(9);
-		colorvec.pop().unwrap();
-		let fg = colorvec.get(15).unwrap().clone();
-
-	ColorDict::new(wallpaper, alpha, &colorvec.get(0).unwrap().clone(), &fg, &fg, colorvec)
-}
-
-trait MagickGen {
-	fn imagemagick(&mut self, file: &Path, quant: u8);
-}
-
-impl MagickGen for Vec<Rgb> {
-	fn imagemagick(&mut self, file: &Path, quant: u8) {
-	
-		let output = Command::new("magick")
-			.args([file.to_str().unwrap(), "-resize", "25%", "-colors", &quant.to_string(), "-unique-colors", "txt:-"])
-			.output()
-			.expect("failed to gather colors");
-	
-		for line in String::from_utf8_lossy(&output.stdout).to_string().lines().skip(1) {
-			let tmp = line.replace('(', "").replace(')', "").split(' ').nth(1).unwrap().to_string();
-			let mut tmp2 = tmp.split(',');
-			let color: Rgb = Rgb::new(
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-			);
-			self.insert(0, color);
+	for (i, col) in colors.into_iter().enumerate() {
+		if i < 8 || i == 15 {
+			colorvec.insert(0, rgb2hex(col));
 		}
 	}
+	colorvec.append(&mut colorvec.to_vec());
+	colorvec.remove(9);
+	colorvec.pop().unwrap();
+	ColorDict::new(wallpaper, alpha, to_array(colorvec))
 }
 
 /*fn graphicsmagick(file: &Path, quant: u8) -> Result<Vec<Rgb>> {
@@ -100,7 +76,7 @@ impl MagickGen for Vec<Rgb> {
 		let color: Rgb = Rgb::new(r as f32, g as f32, b as f32);
 		temp.insert(0, color);
 
-		
+
 		i += 1;
 	}
 

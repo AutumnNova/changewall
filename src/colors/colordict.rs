@@ -3,12 +3,14 @@ use std::path::PathBuf;
 pub struct ColorDict {
 	pub wallpaper: PathBuf,
 	pub alpha: u8,
-	pub background: String,
-	pub foreground: String,
-	pub cursor: String,
-	pub colorvec: Vec<String>,
+	pub colorvec: [String; 16],
 }
 
 impl ColorDict {
-	pub fn new<S: Into<String>, P: Into<PathBuf>> (wallpaper: P, alpha: u8, background: S, foreground: S, cursor: S, colorvec: Vec<String>) -> Self { Self { wallpaper: wallpaper.into(), alpha, background: background.into(), foreground: foreground.into(), cursor: cursor.into(), colorvec } }
+	pub fn new<P: Into<PathBuf>> (wallpaper: P, alpha: u8, colorvec: [String; 16]) -> Self { Self { wallpaper: wallpaper.into(), alpha, colorvec } }
+}
+
+pub fn to_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
+	v.try_into()
+		.unwrap_or_else(|v: Vec<T>| panic!("Expected a Vec of length {} but it was {}", N, v.len()))
 }

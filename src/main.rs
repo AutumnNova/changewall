@@ -4,9 +4,9 @@ mod export;
 mod file;
 mod preview;
 mod reload;
-mod traitdef;
 #[cfg(feature = "timechange")]
 mod timechange;
+mod traitdef;
 use anyhow::Result;
 use cache::{readcache, writecache};
 use clap::{crate_authors, App, Arg, ValueHint};
@@ -24,25 +24,25 @@ fn build_cli() -> clap::App<'static> {
 	App::new("changewal").author(crate_authors!("\n"))
 	.args(&[
 		#[cfg(feature = "timechange")]
-		Arg::new("path").about("Path to wallpaper or directory").value_hint(ValueHint::AnyPath).required_unless_present("time"),
+		Arg::new("path").help("Path to wallpaper or directory").value_hint(ValueHint::AnyPath).required_unless_present("time"),
 		#[cfg(not(feature = "timechange"))]
-		Arg::new("path").about("Path to wallpaper or directory").value_hint(ValueHint::AnyPath),
-		Arg::new("alpha").short('a').long("alpha").default_value("100").about("Effects output of console escape seq and any values filled in via template"),
-		Arg::new("skip").short('s').long("skip").default_value("").hide_default_value(true).about("List of things to skip reloading. Valid options are: (t)erminal, (d)unst, (w)allpaper, (h)ooks, (a)ll"),
-		Arg::new("vte").short('v').long("vte").takes_value(false).about("Skip setting esc seq 708, may fix artifacting in some terms"),
-		Arg::new("preview").short('p').long("preview").takes_value(false).about("Preview current color theme"),
-		Arg::new("nocache").long("nocache").takes_value(false).about("Disable read/write of cache file"),
-		Arg::new("writeseq").long("writeseq").takes_value(false).about("Write file containing escape sequence to ~/.cache/wal/seq"),
+		Arg::new("path").help("Path to wallpaper or directory").value_hint(ValueHint::AnyPath),
+		Arg::new("alpha").short('a').long("alpha").default_value("100").help("Effects output of console escape seq and any values filled in via template"),
+		Arg::new("skip").short('s').long("skip").default_value("").hide_default_value(true).help("List of things to skip reloading. Valid options are: (t)erminal, (d)unst, (w)allpaper, (h)ooks, (a)ll"),
+		Arg::new("vte").short('v').long("vte").takes_value(false).help("Skip setting esc seq 708, may fix artifacting in some terms"),
+		Arg::new("preview").short('p').long("preview").takes_value(false).help("Preview current color theme"),
+		Arg::new("nocache").long("nocache").takes_value(false).help("Disable read/write of cache file"),
+		Arg::new("writeseq").long("writeseq").takes_value(false).help("Write file containing escape sequence to ~/.cache/wal/seq"),
 		#[cfg(feature = "timechange")]
-		Arg::new("time").long("time").short('t').takes_value(false).requires("daybg").requires("nightbg").about("Set wallpaper based on sunset/sunrise"),
+		Arg::new("time").long("time").short('t').takes_value(false).requires("daybg").requires("nightbg").help("Set wallpaper based on sunset/sunrise"),
 		#[cfg(feature = "timechange")]
-		Arg::new("daybg").long("daybg").takes_value(true).about("Wallpaper to be used during the day"),
+		Arg::new("daybg").long("daybg").takes_value(true).help("Wallpaper to be used during the day"),
 		#[cfg(feature = "timechange")]
-		Arg::new("nightbg").long("nightbg").takes_value(true).about("Wallpaper to be used during the night"),
+		Arg::new("nightbg").long("nightbg").takes_value(true).help("Wallpaper to be used during the night"),
 		#[cfg(feature = "timechange")]
-		Arg::new("lat").long("lat").takes_value(true).about("Latitude used for sunrise/sunset calculations"),
+		Arg::new("lat").long("lat").takes_value(true).help("Latitude used for sunrise/sunset calculations"),
 		#[cfg(feature = "timechange")]
-		Arg::new("long").long("long").takes_value(true).about("Latitude used for sunrise/sunset calculations"),
+		Arg::new("long").long("long").takes_value(true).help("Latitude used for sunrise/sunset calculations"),
 	])
 }
 
@@ -64,10 +64,10 @@ fn main() -> Result<()> {
 	}
 
 	#[cfg(not(feature = "timechange"))]
-	let path = arg.value_of_t::<String>("path")?;
+	let path = args.value_of_t::<String>("path")?;
 
 	#[cfg(not(feature = "timechange"))]
-	stdoperation(path, nocache, alpha, skip, vte, writeseq)?;
+	stdoperation(path, appopt)?;
 
 	if args.is_present("preview") {
 		preview()
@@ -87,18 +87,9 @@ fn generate(file: PathBuf, nocache: bool, alpha: u8) -> Result<ColorDict> {
 	}
 }
 
-fn changeops(file: PathBuf, appopt: &AppOpt) -> Result<()> {
-	let dict = generate(file, appopt.nocache, appopt.alpha)?;
-
+fn stdoperation(path: String, appopt: AppOpt) -> Result<()> {
+	let dict = generate(file(path)?, appopt.nocache, appopt.alpha)?;
 	export(&dict)?;
 	reload(dict, (appopt.skip).to_string(), appopt.vte, appopt.writeseq)?;
-	Ok(())
-}
-
-fn stdoperation(path: String, appopt: AppOpt) -> Result<()> {
-	let file = file(path)?;
-
-	changeops(file, &appopt)?;
-
 	Ok(())
 }
