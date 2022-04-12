@@ -9,7 +9,7 @@ mod timechange;
 mod traitdef;
 use anyhow::Result;
 use cache::{readcache, writecache};
-use clap::{crate_authors, App, Arg, ValueHint};
+use clap::{crate_authors, Command, Arg, ValueHint};
 use colors::{colordict::ColorDict, colors};
 use export::export;
 use file::file;
@@ -20,8 +20,8 @@ use std::path::PathBuf;
 use timechange::timebased;
 use traitdef::AppOpt;
 
-fn build_cli() -> clap::App<'static> {
-	App::new("changewal").author(crate_authors!("\n"))
+fn build_cli() -> clap::Command<'static> {
+	Command::new("changewal").author(crate_authors!("\n"))
 	.args(&[
 		#[cfg(feature = "timechange")]
 		Arg::new("path").help("Path to wallpaper or directory").value_hint(ValueHint::AnyPath).required_unless_present("time"),

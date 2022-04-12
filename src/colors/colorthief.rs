@@ -34,8 +34,16 @@ pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 }
 
 pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
-	let mut temp = Vec::new();
-	for rgb in colors {
+	let mut temp = Vec::with_capacity(16);
+	for (i, mut rgb) in colors.into_iter().enumerate() {
+		match i {
+			// vec is inverted so 0=15, 1=14 and so on
+			0 => rgb = blend_color(rgb, Rgb::from_components((238.0/255.0, 238.0/255.0, 238.0/255.0))),
+			7 => rgb = darken_color(rgb, 0.30),
+			8 => rgb = blend_color(rgb, Rgb::from_components((238.0/255.0, 238.0/255.0, 238.0/255.0))),
+			15 => rgb = darken_color_checked(rgb, 0.40),
+			_ => (),
+		}
 		temp.push(rgb);
 	}
 	temp
