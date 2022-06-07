@@ -9,7 +9,7 @@ mod timechange;
 mod traitdef;
 use anyhow::Result;
 use cache::{readcache, writecache};
-use clap::{crate_authors, Command, Arg, ValueHint};
+use clap::{Arg, Command, ValueHint};
 use colors::{colordict::ColorDict, colors};
 use export::export;
 use file::file;
@@ -21,7 +21,7 @@ use timechange::timebased;
 use traitdef::AppOpt;
 
 fn build_cli() -> clap::Command<'static> {
-	Command::new("changewal").author(crate_authors!("\n"))
+	Command::new("changewal").author("Autumn")
 	.args(&[
 		#[cfg(feature = "timechange")]
 		Arg::new("path").help("Path to wallpaper or directory").value_hint(ValueHint::AnyPath).required_unless_present("time"),
@@ -90,6 +90,6 @@ fn generate(file: PathBuf, nocache: bool, alpha: u8) -> Result<ColorDict> {
 fn stdoperation(path: String, appopt: AppOpt) -> Result<()> {
 	let dict = generate(file(path)?, appopt.nocache, appopt.alpha)?;
 	export(&dict)?;
-	reload(dict, (appopt.skip).to_string(), appopt.vte, appopt.writeseq)?;
+	reload(dict, appopt.skip, appopt.vte, appopt.writeseq)?;
 	Ok(())
 }

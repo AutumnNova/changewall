@@ -10,7 +10,6 @@ pub fn writecache(dict: &ColorDict) {
 
 	let mut tmp = String::with_capacity(127);
 	tmp.push_str(&dict.colorvec.join("\n"));
-	println!("{}", tmp.len());
 	write(cachedir.join(dict.wallpaper.to_str().unwrap().replace('/', "%")), tmp).unwrap();
 }
 

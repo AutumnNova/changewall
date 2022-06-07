@@ -5,6 +5,10 @@ edition = "2021"
 license = "GPL-3.0-or-later"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+strip = true
+lto = "thin"
+
 [dependencies]
 notify-rust = "~4.5"
 rand = "~0.8"
@@ -12,7 +16,7 @@ hex = "~0.4"
 home = "~0.5"
 tree_magic_mini = { version = "~3.0" }
 palette = "~0.6"
-clap = { version = "~3.1", features = ["cargo"] }
+clap = "~3.1"
 toml = "~0.5"
 serde = "~1.0"
 anyhow = "~1.0"
