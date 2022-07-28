@@ -67,29 +67,29 @@ fn main() -> Result<()> {
 	let path = args.value_of_t::<String>("path")?;
 
 	#[cfg(not(feature = "timechange"))]
-	stdoperation(path, appopt)?;
+	stdoperation(path, &appopt)?;
 
 	if args.is_present("preview") {
-		preview()
+		preview();
 	}
 	Ok(())
 }
 
 fn generate(file: PathBuf, nocache: bool, alpha: u8) -> Result<ColorDict> {
 	if nocache {
-		Ok(colors(file, alpha))
+		Ok(colors(file, alpha)?)
 	} else {
 		Ok(readcache(&file, &alpha).unwrap_or_else(|_| {
-			let cache = colors(file, alpha);
-			writecache(&cache);
+			let cache = colors(file, alpha).unwrap();
+			writecache(&cache).unwrap();
 			cache
 		}))
 	}
 }
 
-fn stdoperation(path: String, appopt: AppOpt) -> Result<()> {
+fn stdoperation(path: String, appopt: &AppOpt) -> Result<()> {
 	let dict = generate(file(path)?, appopt.nocache, appopt.alpha)?;
 	export(&dict)?;
-	reload(dict, appopt.skip, appopt.vte, appopt.writeseq)?;
+	reload(&dict, &appopt.skip, appopt.vte, appopt.writeseq)?;
 	Ok(())
 }

@@ -1,13 +1,14 @@
 use aho_corasick::AhoCorasick;
+use anyhow::Result;
 use palette::rgb::Rgb;
 use std::{path::Path, process::Command};
 
 pub trait MagickGen {
-	fn imagemagick(&mut self, file: &Path, quant: u8, ac: &AhoCorasick);
+	fn imagemagick(&mut self, file: &Path, quant: u8, ac: &AhoCorasick) -> Result<()>;
 }
 
 impl MagickGen for Vec<Rgb> {
-	fn imagemagick(&mut self, file: &Path, quant: u8, ac: &AhoCorasick) {
+	fn imagemagick(&mut self, file: &Path, quant: u8, ac: &AhoCorasick) -> Result<()> {
 		const REPLACE: &[&str; 2] = &["", ""];
 
 		let output = Command::new("magick")
@@ -19,11 +20,12 @@ impl MagickGen for Vec<Rgb> {
 			let tmp = line.split(' ').nth(1).unwrap().to_string();
 			let mut tmp2 = tmp.split(',');
 			let color: Rgb = Rgb::new(
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
-				tmp2.next().unwrap().parse::<f32>().unwrap() / 255.0,
+				tmp2.next().unwrap().parse::<f32>()? / 255.0,
+				tmp2.next().unwrap().parse::<f32>()? / 255.0,
+				tmp2.next().unwrap().parse::<f32>()? / 255.0,
 			);
 			self.insert(0, color);
 		}
+		Ok(())
 	}
 }

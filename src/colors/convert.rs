@@ -1,31 +1,32 @@
+use anyhow::Result;
 use hex::{decode, encode};
 use palette::rgb::Rgb;
 
-pub fn hex2rgb(hex: &str) -> Rgb {
+pub fn hex2rgb(hex: &str) -> Result<Rgb> {
 	let split1 = hex.strip_prefix('#').unwrap().split_at(2);
 	let split2 = split1.1.split_at(2);
-	Rgb::from_components((
-		decode(split1.0).unwrap().pop().unwrap() as f32 / 255.0,
-		decode(split2.0).unwrap().pop().unwrap() as f32 / 255.0,
-		decode(split2.1).unwrap().pop().unwrap() as f32 / 255.0,
-	))
+	Ok(Rgb::from_components((
+		decode(split1.0)?.pop().unwrap() as f32 / 255.0,
+		decode(split2.0)?.pop().unwrap() as f32 / 255.0,
+		decode(split2.1)?.pop().unwrap() as f32 / 255.0,
+	)))
 }
 
-pub fn hex2rgbdisplay(hex: &str) -> String {
+pub fn hex2rgbdisplay(hex: &str) -> Result<String> {
 	let mut buf = ryu::Buffer::new();
-	let col = hex2rgb(hex);
+	let col = hex2rgb(hex)?;
 	let mut temp = String::with_capacity(11);
 	temp.push_str(buf.format_finite(col.red * 255.0));
 	temp.push(',');
 	temp.push_str(buf.format_finite(col.green * 255.0));
 	temp.push(',');
 	temp.push_str(buf.format_finite(col.blue * 255.0));
-	temp
+	Ok(temp)
 }
 
-pub fn hex2xrgb(hex: &str) -> String {
+pub fn hex2xrgb(hex: &str) -> Result<String> {
 	let mut buf = ryu::Buffer::new();
-	let col = hex2rgb(hex);
+	let col = hex2rgb(hex)?;
 	let mut temp = String::with_capacity(14);
 	temp.push_str(buf.format_finite(col.red * 255.0));
 	temp.push('/');
@@ -33,7 +34,7 @@ pub fn hex2xrgb(hex: &str) -> String {
 	temp.push('/');
 	temp.push_str(buf.format_finite(col.blue * 255.0));
 	temp.push_str("/ff");
-	temp
+	Ok(temp)
 }
 
 pub fn rgb2hex(rgb: Rgb) -> String {

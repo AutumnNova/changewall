@@ -1,7 +1,7 @@
 mod traitdef;
 use super::super::colors::colordict::ColorDict;
 use traitdef::PushSeq;
-pub fn seq(dict: ColorDict, vte: bool) -> String {
+pub fn seq(dict: &ColorDict, vte: bool) -> String {
 	let mut prealloc_len: usize = 364;
 	if !vte {
 		prealloc_len += 15;

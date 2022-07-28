@@ -3,11 +3,12 @@ use super::colordict::to_array;
 use super::colordict::ColorDict;
 use super::convert::{blend_color, darken_color, darken_color_checked, rgb2hex};
 use aho_corasick::{AhoCorasickBuilder, MatchKind};
+use anyhow::Result;
 use palette::rgb::Rgb;
 use std::{path::{Path, PathBuf}, process::exit};
 use traitdef::MagickGen;
 
-pub fn gen_colors(file: &Path) -> Vec<Rgb> {
+pub fn gen_colors(file: &Path) -> Result<Vec<Rgb>> {
 	const PATTERN: &[&str; 2] = &["(", ")"];
 
 	let mut temp = Vec::with_capacity(16);
@@ -19,7 +20,7 @@ pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 		.build(PATTERN);
 
 	while i <= 10 {
-		temp.imagemagick(file, 16 + i, &ac);
+		temp.imagemagick(file, 16 + i, &ac)?;
 
 		if temp.len() >= 16 {
 			break;
@@ -33,7 +34,7 @@ pub fn gen_colors(file: &Path) -> Vec<Rgb> {
 		println!("Could not generate palette for {} within 10 attemps, Exiting", file.to_str().unwrap());
 		exit(0)
 	}
-	temp
+	Ok(temp)
 }
 
 pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
@@ -41,9 +42,8 @@ pub fn adjust(colors: Vec<Rgb>) -> Vec<Rgb> {
 	for (i, mut rgb) in colors.into_iter().enumerate() {
 		match i {
 			// vec is inverted so 0=15, 1=14 and so on
-			0 => rgb = blend_color(rgb, Rgb::from_components((238.0/255.0, 238.0/255.0, 238.0/255.0))),
+			0 | 8 => rgb = blend_color(rgb, Rgb::from_components((238.0/255.0, 238.0/255.0, 238.0/255.0))),
 			7 => rgb = darken_color(rgb, 0.30),
-			8 => rgb = blend_color(rgb, Rgb::from_components((238.0/255.0, 238.0/255.0, 238.0/255.0))),
 			15 => rgb = darken_color_checked(rgb, 0.40),
 			_ => (),
 		}
@@ -60,7 +60,7 @@ pub fn format(colors: Vec<Rgb>, wallpaper: PathBuf, alpha: u8) -> ColorDict {
 			colorvec.insert(0, rgb2hex(col));
 		}
 	}
-	colorvec.append(&mut colorvec.to_vec());
+	colorvec.append(&mut colorvec.clone());
 	colorvec.remove(9);
 	colorvec.pop().unwrap();
 	ColorDict::new(wallpaper, alpha, to_array(colorvec))

@@ -9,13 +9,13 @@ use seq::seq;
 use std::{fs::{read_dir, read_to_string, write}, path::{Path, PathBuf}, process::{Command, Stdio}, thread::sleep, time::Duration};
 use toml::from_str;
 
-pub fn reload(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
+pub fn reload(dict: &ColorDict, skip: &str, vte: bool, writeseq: bool) -> Result<()> {
 	if skip == "a" {
 		return Ok(());
 	}
 
 	if !skip.contains('h') {
-		reload_hooks()?
+		reload_hooks()?;
 	}
 	reload_progs(dict, skip, vte, writeseq)?;
 	Ok(())
@@ -29,13 +29,13 @@ fn reload_hooks() -> Result<()> {
 
 		for mut item in reload_hook.items.unwrap() {
 			item.args.insert(0, item.hook);
-			droppedcmd(&item.args)
+			droppedcmd(&item.args);
 		}
 	}
 	Ok(())
 }
 
-fn reload_progs(dict: ColorDict, skip: String, vte: bool, writeseq: bool) -> Result<()> {
+fn reload_progs(dict: &ColorDict, skip: &str, vte: bool, writeseq: bool) -> Result<()> {
 	if !skip.contains('w') {
 		set_wallpaper(&dict.wallpaper);
 	}
@@ -60,7 +60,7 @@ fn notif_daemon() -> Result<()> {
 	Ok(())
 }
 
-fn reload_terms(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
+fn reload_terms(dict: &ColorDict, vte: bool, writeseq: bool) -> Result<()> {
 	let seq = seq(dict, vte);
 	for dir in read_dir("/dev/pts/").with_context(|| "Failed to read /dev/pts/")? {
 		let file = dir?.path();
@@ -75,7 +75,7 @@ fn reload_terms(dict: ColorDict, vte: bool, writeseq: bool) -> Result<()> {
 }
 
 fn set_wallpaper(path: &Path){
-	droppedcmd(&["feh".to_string(), "--no-fehbg".to_string(), "--bg-fill".to_string(), path.display().to_string()])
+	droppedcmd(&["feh".to_string(), "--no-fehbg".to_string(), "--bg-fill".to_string(), path.display().to_string()]);
 }
 
 fn droppedcmd(command: &[String]) {
