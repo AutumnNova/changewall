@@ -22,7 +22,9 @@ impl PushSeq for String {
 	}
 
 	fn push_strs_special_alpha(&mut self, index: u16, color: &str, alpha: u8) {
-		if alpha != 100 {
+		if alpha == 100 {
+			self.push_strs_special(index, color);
+		} else {
 			self.push_str("\u{001B}]");
 			self.push_str(&index.to_string());
 			self.push(';');
@@ -31,8 +33,6 @@ impl PushSeq for String {
 			self.push(']');
 			self.push_str(color);
 			self.push_str("\u{001B}\\");
-		} else {
-			self.push_strs_special(index, color);
 		}
 	}
 }

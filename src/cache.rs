@@ -14,10 +14,10 @@ pub fn writecache(dict: &ColorDict) -> Result<()> {
 	Ok(())
 }
 
-pub fn readcache(wallpaper: &Path, alpha: &u8) -> Result<ColorDict> {
+pub fn readcache(wallpaper: &Path, alpha: u8) -> Result<ColorDict> {
 	let cachedir = home_dir().unwrap().join(".cache/wal/palette");
-	let data = read_to_string(cachedir.join(&wallpaper.to_str().unwrap().replace('/', "%")))?;
-	let colorvec: [String; 16] = to_array(data.lines().map(|x|x.to_string()).collect());
-	let dict = ColorDict::new(wallpaper, *alpha, colorvec);
+	let data = read_to_string(cachedir.join(wallpaper.to_str().unwrap().replace('/', "%")))?;
+	let colorvec: [String; 16] = to_array(data.lines().map(std::string::ToString::to_string).collect());
+	let dict = ColorDict::new(wallpaper, alpha, colorvec);
 	Ok(dict)
 }

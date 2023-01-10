@@ -1,11 +1,12 @@
-use chrono::{DateTime, Local};
+//use chrono::{DateTime, Local};
+use time::OffsetDateTime;
 
 pub struct CacheTimeInfo {
-	pub sunrise: DateTime<Local>,
-	pub sunset: DateTime<Local>,
-	pub cacheday: u32,
+	pub sunrise: OffsetDateTime,
+	pub sunset: OffsetDateTime,
+	pub cacheday: u8,
 }
 
 impl CacheTimeInfo {
-	pub fn new(sunrise: DateTime<Local>, sunset: DateTime<Local>, cacheday: u32) -> Self { Self { sunrise, sunset, cacheday } }
+	pub fn new(sunrise: OffsetDateTime, sunset: OffsetDateTime, cacheday: u8) -> Self { Self { sunrise, sunset, cacheday } }
 }

@@ -10,5 +10,5 @@ pub struct AppOpt {
 }
 
 impl AppOpt {
-	pub fn grabargs(args: &ArgMatches) -> Self { Self { alpha: args.value_of_t::<u8>("alpha").unwrap().min(100).max(0), nocache: args.is_present("nocache"), skip: args.value_of_t::<String>("skip").unwrap() , vte: args.is_present("vte"), writeseq: args.is_present("writeseq") } }
+	pub fn grabargs(args: &ArgMatches) -> Self { Self { alpha: *args.get_one::<u8>("alpha").unwrap().clamp(&0, &100), nocache: args.get_flag("nocache"), skip: args.get_one::<String>("skip").unwrap().to_string() , vte: args.get_flag("vte"), writeseq: args.get_flag("writeseq") } }
 }

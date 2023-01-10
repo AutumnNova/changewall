@@ -13,7 +13,7 @@ pub fn export(dict: &ColorDict) -> Result<()> {
 	let cachedir = home_dir().unwrap().join(".cache/wal");
 
 	create_dir_all(&templatedir)?;
-	create_dir_all(&cachedir)?;
+	create_dir_all(cachedir)?;
 
 	let mut value_vec = Vec::<String>::with_capacity(80);
 	value_vec.push(dict.wallpaper.to_string_lossy().to_string());
@@ -24,7 +24,7 @@ pub fn export(dict: &ColorDict) -> Result<()> {
 	value_vec.push_variants(&dict.colorvec[0])?;
 	value_vec.push_variants(&dict.colorvec[15])?;
 
-	for entry in dict.colorvec.iter() {
+	for entry in &dict.colorvec {
 		value_vec.push_variants(entry)?;
 	}
 

@@ -2,7 +2,7 @@ use anyhow::Result;
 use rand::{thread_rng, Rng};
 use std::{fs::{canonicalize, read_dir}, path::{Path, PathBuf}, process::exit};
 use tree_magic_mini::from_filepath;
-pub fn file(path: String) -> Result<PathBuf> {
+pub fn file(path: &String) -> Result<PathBuf> {
 	let path = PathBuf::from(path);
 	if path.is_dir() {
 		Ok(canonicalize(rand(path)?)?)
