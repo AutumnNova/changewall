@@ -18,7 +18,7 @@ pub fn export(dict: &ColorDict) -> Result<()> {
 	let mut value_vec = Vec::<String>::with_capacity(80);
 	value_vec.push(dict.wallpaper.to_string_lossy().to_string());
 	value_vec.push(dict.alpha.to_string());
-	value_vec.push(ryu::Buffer::new().format_finite(dict.alpha as f32 / 100.0).to_string());
+	value_vec.push((dict.alpha as f32 / 100.0).to_string());
 	value_vec.push(format!("[{}]{}", dict.alpha, dict.colorvec[0]));
 	value_vec.push_variants(&dict.colorvec[15])?;
 	value_vec.push_variants(&dict.colorvec[0])?;
@@ -30,8 +30,7 @@ pub fn export(dict: &ColorDict) -> Result<()> {
 
 	let ac = AhoCorasickBuilder::new()
 		.match_kind(MatchKind::LeftmostFirst)
-		.auto_configure(PATTERN)
-		.build(PATTERN);
+		.build(PATTERN)?;
 
 	for file in read_dir(templatedir)? {
 		let file = file?.path();

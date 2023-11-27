@@ -1,5 +1,5 @@
 use anyhow::Result;
-use rand::{thread_rng, Rng};
+use fastrand::usize;
 use std::{fs::{canonicalize, read_dir}, path::{Path, PathBuf}, process::exit};
 use tree_magic_mini::from_filepath;
 pub fn file(path: &String) -> Result<PathBuf> {
@@ -31,6 +31,6 @@ fn is_img(file: &Path) -> bool {
 
 fn rand(path: PathBuf) -> Result<PathBuf> {
 	let valid = dir(path)?;
-	let num = thread_rng().gen_range(0..valid.len());
+	let num = usize(..valid.len());
 	Ok(valid.into_iter().nth(num).unwrap())
 }

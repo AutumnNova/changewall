@@ -10,18 +10,19 @@ strip = true
 lto = "thin"
 
 [dependencies]
-notify-rust = { version = "~4.6", default-features = false, features = ["d"]}
-rand = "~0.8"
+magick_rust = "0.19.1"
+notify-rust = { version = "~4.10", default-features = false, features = ["d"]}
+#notify-rust = "~4.8"
+fastrand = "~2.0"
 hex = "~0.4"
 home = "~0.5"
-tree_magic_mini = { version = "~3.0" }
-palette = "~0.6"
-clap = "~4.0"
-toml = "~0.5"
+tree_magic_mini = "~3.0"
+palette = { features = ["std"], default-features = false, version = "~0.7" }
+clap = "~4.4"
+toml = "~0.8"
 serde = { version = "~1.0", features = ["derive"]}
 anyhow = "~1.0"
-aho-corasick = "~0.7"
-ryu = "~1.0"
+aho-corasick = "~1.1"
 
 color-thief = { version = "~0.2", optional = true }
 image = { version = "~0.24", optional = true }
@@ -30,6 +31,7 @@ image = { version = "~0.24", optional = true }
 
 [features]
 default = []
-colorthief = ["color-thief", "image"]
+#This is pretty much just unfinished and also not updated
+#colorthief = ["color-thief", "image"]
 #TODO: FIX
 #timechange = ["time", "sunrise"]
