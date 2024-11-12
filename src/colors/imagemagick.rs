@@ -5,8 +5,6 @@ use super::convert::{blend_color, darken_color, darken_color_checked, rgb2hex};
 //use aho_corasick::{AhoCorasickBuilder, MatchKind};
 use anyhow::Result;
 use magick_rust::MagickWand;
-use magick_rust::ToMagick;
-use magick_rust::bindings;
 use palette::Srgb;
 use std::{path::{Path, PathBuf}, process::exit};
 use traitdef::MagickGen;
@@ -24,12 +22,12 @@ pub fn gen_colors(file: &Path) -> Result<Vec<Srgb<u8>>> {
 
 	let wand = MagickWand::new();
 	wand.read_image(file.to_str().unwrap())?;
-	wand.resize_image((wand.get_image_width() as f32 * 0.25) as usize , (wand.get_image_height() as f32 * 0.25) as usize, bindings::FilterType_LanczosFilter);
+	wand.resize_image((wand.get_image_width() as f32 * 0.25) as usize , (wand.get_image_height() as f32 * 0.25) as usize, magick_rust::FilterType::Lanczos)?;
 	let blob = wand.write_image_blob("MIFF").unwrap();
 
 	while i <= 10 {
 		//temp.imagemagick(file, 16 + i, &ac)?;
-		wand.quantize_image(16 + i, wand.get_colorspace(), 3, bindings::DitherMethod_RiemersmaDitherMethod, false.to_magick())?;
+		wand.quantize_image(16 + i, wand.get_colorspace(), 3, magick_rust::DitherMethod::Riemersma, false)?;
 		wand.unique_image_colors()?;
 		if wand.get_image_colors() >= 16 {
 		//if temp.len() >= 16 {
